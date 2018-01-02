@@ -1,0 +1,39 @@
+class Stair
+types
+		public X = nat;
+		public Y = nat;
+		public Desc = seq of char;
+		public DownFloor = nat;
+		public UpFloor = nat;
+		public Direction = <Down> | <Up> | <Both>; 
+instance variables
+		public x:X;
+		public y:Y;
+		public description:Desc;
+		public downFloor : DownFloor;
+		public upFloor : UpFloor;
+		public direction : Direction;
+operations
+	-- Create stair
+	public Stair : Stair`X * Stair`Y * Stair`Desc * Stair`DownFloor * Stair`UpFloor * Stair`Direction ==> Stair
+	Stair(tempX,tempY, desc, tempDown, tempUp, tempDir) == (
+		x := tempX;
+	  y := tempY;
+	  description :=desc;
+	  downFloor := tempDown;
+	  upFloor := tempUp;
+	  direction := tempDir;
+	  return self;
+	);
+	
+		--Change X Y, Description, DownFloor, UpFloor and Direction of stair
+	public changeStair : Stair`X * Stair`Y * Stair`Desc * Stair`DownFloor * Stair`UpFloor * Stair`Direction ==> ()
+		changeStair(tempX,tempY, desc, tempDown, tempUp, tempDir) == (
+			x := tempX;
+			y := tempY;
+			description := desc;
+			downFloor := tempDown;
+	  	upFloor := tempUp;
+	  	direction := tempDir;
+		);
+end Stair

@@ -1,0 +1,51 @@
+class Building
+types
+	 public Points = set of PointOfInterest;
+	 public Stairs = set of Stair;
+
+
+instance variables
+
+	public points : Points := {};
+	public stairs : Stairs := {};
+
+operations
+	--create a building
+	public Building:() ==> Building
+	Building() ==
+		return self;
+	-- Add a point to the building
+	--TODO pre ser diferente de pontos existentes
+	public addPoint: PointOfInterest`X*PointOfInterest`Y*PointOfInterest`Z*PointOfInterest`Desc ==> ()
+		addPoint(x,y,z,desc) == (
+			dcl point : PointOfInterest := new PointOfInterest(x,z,y,desc);
+				points := points union {point};
+			return;
+		);
+		
+	-- Add a stair to the building
+	--TODO pre ser diferente de stairs existentes
+	public addStair: Stair`X*Stair`Y*Stair`Desc*Stair`DownFloor*Stair`UpFloor*Stair`Direction ==> ()
+		addStair(x,y,desc,down,up,dir) == (
+			dcl stair : Stair := new Stair(x,y,desc,down,up,dir);
+				stairs := stairs union {stair};
+			return;
+		);
+		
+	-- Change X Y Z and Description of point of interest 
+	-- TODO pre Ponto ja existir E novo Ponto nao existir
+	-- post o ponto antigo ja nao existir
+	
+	-- Change X Y, Description, DownFloor, UpFloor and Direction of stair
+	-- TODO pre Ponto ja existir E novo Ponto nao existir
+	-- post o ponto antigo ja nao existir
+	
+	-- Remove point of interest
+	-- TODO pre existir esse ponto
+	-- post nao existir o ponto
+	
+	-- Remove stair
+	-- TODO pre existir esse ponto
+	-- post nao existir o ponto
+	
+end Building
