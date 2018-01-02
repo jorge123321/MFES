@@ -1,39 +1,39 @@
-class Stair
+class Transport
 types
 		public X = nat;
 		public Y = nat;
 		public Desc = seq of char;
 		public DownFloor = nat;
 		public UpFloor = nat;
-		public Direction = <Down> | <Up> | <Both>; 
+		public Type = <Elevator> | <Stair>; 
 instance variables
 		public x:X;
 		public y:Y;
 		public description:Desc;
 		public downFloor : DownFloor;
 		public upFloor : UpFloor;
-		public direction : Direction;
+		public type : Type;
 operations
 	-- Create stair
-	public Stair : Stair`X * Stair`Y * Stair`Desc * Stair`DownFloor * Stair`UpFloor * Stair`Direction ==> Stair
-	Stair(tempX,tempY, desc, tempDown, tempUp, tempDir) == (
+	public Transport : Transport`X * Transport`Y * Transport`Desc * Transport`DownFloor * Transport`UpFloor * Transport`Type ==> Transport
+	Transport(tempX,tempY, desc, tempDown, tempUp, tempType) == (
 		x := tempX;
 	  y := tempY;
 	  description :=desc;
 	  downFloor := tempDown;
 	  upFloor := tempUp;
-	  direction := tempDir;
+	  type := tempType;
 	  return self;
 	);
 	
 		--Change X Y, Description, DownFloor, UpFloor and Direction of stair
-	public changeStair : Stair`X * Stair`Y * Stair`Desc * Stair`DownFloor * Stair`UpFloor * Stair`Direction ==> ()
-		changeStair(tempX,tempY, desc, tempDown, tempUp, tempDir) == (
+	public changeTransport : Transport`X * Transport`Y * Transport`Desc * Transport`DownFloor * Transport`UpFloor * Transport`Type ==> ()
+		changeTransport(tempX,tempY, desc, tempDown, tempUp, tempType) == (
 			x := tempX;
 			y := tempY;
 			description := desc;
 			downFloor := tempDown;
 	  	upFloor := tempUp;
-	  	direction := tempDir;
+	  	type := tempType;
 		);
-end Stair
+end Transport
