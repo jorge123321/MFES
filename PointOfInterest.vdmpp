@@ -1,32 +1,41 @@
 class PointOfInterest
 types
-		public X = nat;
-		public Y = nat;
-		public Z = nat;
 		public Desc = seq of char;
+		public Position :: x: nat
+											y: nat
+											z: nat
+											inv pos == pos.x >= 0 and pos.x <= 10 and pos.y >= 0 and pos.y <= 10 and pos.z >= 0 and pos.z <= 2;
 
 instance variables
-		public x: X;
-		public y: Y;
-		public z : Z;
-		public description : Desc;
+		private position : Position;
+		private description : Desc;
 operations
 	-- Create point of interest
-	public PointOfInterest : PointOfInterest`X * PointOfInterest`Y * PointOfInterest`Z * PointOfInterest`Desc  ==> PointOfInterest
-	PointOfInterest(tempX,tempY, tempZ, desc) == (
-		x := tempX;
-	  y := tempY;
-	  z := tempZ;
+	public PointOfInterest : nat * nat * nat * PointOfInterest`Desc  ==> PointOfInterest
+	PointOfInterest(x,y,z,desc) == (
+		position := mk_Position(x,y,z);
 	  description := desc;
 	  return self;
 	);
+	public SetX: nat ==> () 
+		SetX(x) == (position.x := x;); 
+	public SetY : nat ==> ()
+		SetY(y) == (position.y := y;); 
+	public SetZ : nat ==> ()
+		SetZ(z) == (position.z := z;); 
+	public GetX : () ==> nat
+		GetX() == (return position.x;);
+	public GetY : () ==> nat
+		GetY() == (return position.y;);
+	public GetZ : () ==> nat
+		GetZ() == (return position.z;);
 	
-	-- Change X Y and Description of point of interest 
-	public changePoint : PointOfInterest`X * PointOfInterest`Y * PointOfInterest`Z * PointOfInterest`Desc ==> ()
-		changePoint(newX, newY, newZ, newDesc) == (
-			x := newX;
-			y := newY;
-			z := newZ;
+	-- Change position and Description of point of interest 
+	public changePoint : nat * nat * nat * PointOfInterest`Desc ==> ()
+		changePoint(x, y, z, newDesc) == (
+			position.x := x;
+			position.y := y;
+			position.z := z;
 			description := newDesc;
 		);
 	
