@@ -57,19 +57,12 @@ operations
 		--post P in set points; --TODO: maybe check that the point WAS set as origin? like it's description indicates origin
 		
 	-- Add an origin point to the building for the algorithm
-	public addDestination: nat * nat * nat ==> bool
-		addDestination(x,y,z) == (
-			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
-				then (
-					changePoint(p, x, y, z, "destination");
-					return true;
-				)
-			);
-			return false;
-		);
-		--pre P in set points --TODO: maybe check that the point CAN be set as destination? like it's a clear path or not a wall
-		--post P in set points; --TODO: maybe check that the point WAS set as destination? like it's description indicates destination
+	public addDestination: PointOfInterest ==> ()
+		addDestination(P) == (
+			changePoint(P, P.GetX(), P.GetY(), P.GetZ(), "destination");
+		)
+		pre P in set points --TODO: maybe check that the point CAN be set as destination? like it's a clear path or not a wall
+		post P in set points; --TODO: maybe check that the point WAS set as destination? like it's description indicates destination
 		
 	-- Add a point to the building
 	public addPoint: PointOfInterest ==> ()
