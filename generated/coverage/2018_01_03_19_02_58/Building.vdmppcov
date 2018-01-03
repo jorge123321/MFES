@@ -85,21 +85,6 @@ operations
 					return true;
 				) else ( return false; )
 			);
-			
-		-- checks if building has only 1 origin point
-		public hasOrigin : () ==> bool
-			hasOrigin() == (
-				dcl pointsOrigin : Points := {};
-				for all p in set points do (
-					if p.GetDesc() = "origin"
-					then (
-						pointsOrigin := pointsOrigin union {p};
-					)
-				);
-				if card(pointsOrigin) = 1 then (
-					return true;
-				) else ( return false; )
-			);
 		
 	-- Add a point to the building
 	public addPoint: PointOfInterest ==> ()
