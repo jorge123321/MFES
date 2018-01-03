@@ -2,50 +2,127 @@ class Building
 types
 	 public Points = set of PointOfInterest;
 	 public Transports = set of Transport;
-
+	 public Equipments = set of Equipment;
 
 instance variables
 
 	public points : Points := {};
 	public transports : Transports := {};
+	public equipments : Equipments := {};
 
 operations
+
 	--create a building
 	public Building:() ==> Building
 	Building() ==
 		return self;
+		
 	-- Add a point to the building
-	--TODO pre ser diferente de pontos existentes
-	public addPoint: PointOfInterest`X*PointOfInterest`Y*PointOfInterest`Z*PointOfInterest`Desc ==> ()
-		addPoint(x,y,z,desc) == (
-			dcl point : PointOfInterest := new PointOfInterest(x,z,y,desc);
-				points := points union {point};
+	public addPoint: PointOfInterest ==> ()
+		addPoint(P) == (
+				points := points union {P};
 			return;
-		);
+		)
+		pre P not in set points
+		post P in set points;
 		
 	-- Add a stair to the building
-	--TODO pre ser diferente de stairs existentes
-	public addTransport: Transport`X*Transport`Y*Transport`Desc*Transport`DownFloor*Transport`UpFloor*Transport`Type ==> ()
-		addTransport(x,y,desc,down,up,type) == (
-			dcl transport : Transport := new Transport(x,y,desc,down,up,type);
-				transports := transports union {transport};
+	public addTransport: Transport ==> ()
+		addTransport(T) == (
+				transports := transports union {T};
 			return;
-		);
+		)
+		pre T not in set transports
+		post T in set transports;
+		
+	-- Add an equipment to the building
+	public addEquipment: Equipment ==> ()
+		addEquipment(E) == (
+				equipments := equipments union {E};
+			return;
+		)
+		pre E not in set equipments
+		post E in set equipments;
 		
 	-- Change X Y Z and Description of point of interest 
-	-- TODO pre Ponto ja existir E novo Ponto nao existir
-	-- post o ponto antigo ja nao existir
+	public changePoint: PointOfInterest*PointOfInterest`X*PointOfInterest`Y*PointOfInterest`Z*PointOfInterest`Desc ==> ()
+		changePoint(P,newx, newy, newz, newdesc) == (
+			P.changePoint(newx, newy,newz,newdesc);
+			return;
+		)
+		pre P in set points;
 	
 	-- Change X Y, Description, DownFloor, UpFloor and Type of stair
-	-- TODO pre Ponto ja existir E novo Ponto nao existir
-	-- post o ponto antigo ja nao existir
+	public changeTransport: Transport*Transport`X * Transport`Y * Transport`Desc * Transport`DownFloor * Transport`UpFloor * Transport`Type ==> ()
+		changeTransport(T,newx, newy, newdesc, newdown, newup, newtype) == (
+			T.changeTransport(newx, newy, newdesc, newdown, newup, newtype);
+			return;
+		)
+		pre T in set transports;
+		
+	-- Change X Y, Z and name of equipment
+	public changeEquipment: Equipment * Equipment`X * Equipment`Y * Equipment`Z * Equipment`Name ==> ()
+		changeEquipment(E, newx, newy, newz, newname) == (
+			E.changeEquipment(newx, newy, newz, newname);
+			return;
+		)
+		pre E in set equipments;
 	
 	-- Remove point of interest
-	-- TODO pre existir esse ponto
-	-- post nao existir o ponto
+	public removePoint: PointOfInterest ==>()
+		removePoint(P) == (
+			points := points \ {P};
+			return;
+		)
+		pre P in set points
+		post P not in set points;
 	
-	-- Remove stair
-	-- TODO pre existir esse ponto
-	-- post nao existir o ponto
+	-- Remove transport
+	public removeTransport: Transport ==>()
+		removeTransport(T) == (
+			transports := transports \ {T};
+			return;
+		)
+		pre T in set transports
+		post T not in set transports;
+		
+	-- Remove equipment
+	public removeEquipment: Equipment ==>()
+		removeEquipment(E) == (
+			equipments := equipments \ {E};
+			return;
+		)
+		pre E in set equipments
+		post E not in set equipments;
+		
+		--Remove all points
+		public removePoints:() ==> ()
+			removePoints() == (
+				points := points \ points;
+			) 
+		pre points <> {}
+		post points = {};
+		
+		--Remove all transports
+		public removeTransports:() ==> ()
+			removeTransports() == (
+				transports := transports \ transports;
+			) 
+		pre transports <> {}
+		post transports = {};
+		
+		--Remove all equipments
+		public removeEquipments:() ==> ()
+			removeEquipments() == (
+				equipments := equipments \ equipments;
+			) 
+		pre equipments <> {}
+		post equipments = {};
+		
+		--GET SHORTEST PATH P1 TO P2		
+		
+		--GET SHORTEST ACCESSIBLE PATH 
+		
+		--GET CLOSER TYPE OF EQUIPMENT
 	
 end Building

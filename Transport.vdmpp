@@ -14,7 +14,7 @@ instance variables
 		public upFloor : UpFloor;
 		public type : Type;
 operations
-	-- Create stair
+	-- Create Transport
 	public Transport : Transport`X * Transport`Y * Transport`Desc * Transport`DownFloor * Transport`UpFloor * Transport`Type ==> Transport
 	Transport(tempX,tempY, desc, tempDown, tempUp, tempType) == (
 		x := tempX;
@@ -26,7 +26,7 @@ operations
 	  return self;
 	);
 	
-		--Change X Y, Description, DownFloor, UpFloor and Direction of stair
+		--Change X Y, Description, DownFloor, UpFloor and Direction of Transport
 	public changeTransport : Transport`X * Transport`Y * Transport`Desc * Transport`DownFloor * Transport`UpFloor * Transport`Type ==> ()
 		changeTransport(tempX,tempY, desc, tempDown, tempUp, tempType) == (
 			x := tempX;
