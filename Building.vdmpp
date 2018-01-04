@@ -131,8 +131,10 @@ operations
 			dcl pathToDest: seq of PointOfInterest := [];
 			dcl arrivedOrigin: bool := false;
 			dcl tempPoint: PointOfInterest :=  destination;
+			dcl count : int := 0;
+			dcl maxIterations : int := card(dom pred);
 			pathToDest := pathToDest ^ [tempPoint]; --add destination as starter
-			while(not arrivedOrigin) do (
+			while(not arrivedOrigin and count < maxIterations) do (
 				for all p1 in set dom pred do (
 					if(sameCoords(tempPoint, p1)) then (
 						if(sameCoords(p1, origin)) then (
@@ -142,9 +144,14 @@ operations
 							tempPoint := pred(p1);	
 						)
 					)
-				)
+				);
+				count := count + 1;
 			);
-			return pathToDest;
+			if(count = maxIterations and not arrivedOrigin) then (
+				return [];
+			) else (
+				return pathToDest;
+			);
 		);
 
 	--Dijkstra
