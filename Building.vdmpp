@@ -101,19 +101,54 @@ operations
 			)
 		);
 		
-			for all p in set points do(
-				let tedges = {{p,e2}| e2 in set getNeighbours(p) & e2.GetDesc() <> <Wall>} in(
-				
-					edges := edges union tedges;
-				)
-			);
+		);
+		
+		--public indoorFinder: () ==> seq of PointOfInterest
+		--	indoorFinder() == (
+		--		if(sameZ(origin, destination)) then 
+		--		(
+		--			dijkstra(origin);
+		--			return makePath();
+		--		)else
+		--		(
+		--			dcl pathToStair: seq of PointOfInterest := [];
+		--			dcl tempDest : PointOfInterest;
+		--			pathToStair := checkNearestPath(<Stair>);
+		--			for all p in set pathToStair do(
+		--				if(p.GetDesc() = <Destination>) then 
+		--				(
+		--					tempDest := p;
+		--				)
+		--			);					
+		--		return indoorFinderZ(pathToStair, tempDest);	
+		--		);				
+		--	);
 			
-			let tedges = {e | e in set edges} in(
-				let tgraph = {mk_Graph(e,w) | e in set edges, w in set weights} in (
-					graph := tgraph;
-				)
+		--public indoorFinderZ: seq of PointOfInterest ==> seq of PointOfInterest
+		--	indoorFinderZ(pointSeq, tempOrigin) == (
+		--		if(sameZ(tempOrigin, destination)) then 
+		--		(
+		--			dijkstra(tempOrigin);
+		--			pointSeq := pointSeq union makePath();
+		--			return pointSeq;
+		--		)else
+		--		(
+		--			pointSeq := pointSeq union checkNearestPath(<Stair>); --funçao a fazer igual para stair e elevator
+		--		)		
+		--		
+		--	);
+			
+			
+		public sameZ: PointOfInterest * PointOfInterest ==> bool
+		sameZ(p1, p2) == (
+			if(p1.GetZ() = p2.GetZ()) then (
+				return true;
+			) else (
+				return false;
 			)
 		);
+			
+		
 		
 	--utility function to check if a point has the same coords as another point
 	public sameCoords: PointOfInterest * PointOfInterest ==> bool
@@ -148,10 +183,27 @@ operations
 		);
 
 	--Dijkstra
+	--public dijkstra: PointOfInterest ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+		--dijkstra(s) == (
 	public dijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+
 		dijkstra() == (
-			Q := points;
+		
+			for all p in set points do(
+				let tedges = {{p,e2}| e2 in set getNeighbours(p) & e2.GetDesc() <> <Wall>} in(
+				
+					edges := edges union tedges;
+				)
+			);
+			
+			let tedges = {e | e in set edges} in(
+				let tgraph = {mk_Graph(e,w) | e in set edges, w in set weights} in (
+					graph := tgraph;
+				)
+			);
+			
 			s := origin;
+			Q := points;
 			C := C union {s};
 			dist := dist ++ {s|->0}; --TODO RESET BOTH BEFORE THIS
 			pred := dist ++ {s|->s}; --TODO RESET BOTH BEFORE THIS
@@ -161,20 +213,22 @@ operations
 					Q := Q\{u};
 				
 					for all v in set Q do(
-						if(u in set getNeighbours(v)) then(
-							let uv in set graph be st uv.e={u,v} in(
-								if uv.w > 0 then (
-									let length=dist(u)+uv.w in(
-										if v in set C then(
-											if length < dist(v) then(
-												dist := dist ++ {v|->length};
-												pred := pred ++ {v|-> u};
+						if(v.GetDesc() <> <Wall>) then (
+							if(u in set getNeighbours(v)) then(
+								let uv in set graph be st uv.e={u,v} in(
+									if uv.w > 0 then (
+										let length=dist(u)+uv.w in(
+											if v in set C then(
+												if length < dist(v) then(
+													dist := dist ++ {v|->length};
+													pred := pred ++ {v|-> u};
+												)
 											)
-										)
-										else (
-											dist := dist ++ {v|->length};
-											pred := pred ++ {v|->u};
-											C := C union {v};
+											else (
+												dist := dist ++ {v|->length};
+												pred := pred ++ {v|->u};
+												C := C union {v};
+											)
 										)
 									)
 								)
@@ -185,8 +239,8 @@ operations
 			);
 			return mk_(C,dist,pred);
 	)
-	pre hasOrigin(points) and hasDestination(points);
---	post IsShortestPath(dist, pred, C, s, graph,points);
+	pre hasOrigin(points) and hasDestination(points)
+	post IsShortestPath(dist, pred, C, s, graph,points);
 			
 	-- Add a point to the building
 	public addPoint: PointOfInterest ==> ()
@@ -266,19 +320,28 @@ operations
 		getNeighbours(point) == (
 			dcl neighboursSet : set of PointOfInterest := {};
 			for all p1 in set points do (
-				if(p1.GetX() = (point.GetX() - 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then
-				(
-					neighboursSet := neighboursSet union {p1};
-				) else if (p1.GetX() = (point.GetX() + 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then 
-				(
-					neighboursSet := neighboursSet union {p1};
-				) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() - 1) and p1.GetZ() = point.GetZ()) then 
-				(
-					neighboursSet := neighboursSet union {p1};
-				) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() + 1) and p1.GetZ() = point.GetZ()) then 
-				(
-					neighboursSet := neighboursSet union {p1};
-				);
+					if(p1.GetX() = (point.GetX() - 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then
+					(
+						neighboursSet := neighboursSet union {p1};
+					) else if (p1.GetX() = (point.GetX() + 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then 
+					(
+						neighboursSet := neighboursSet union {p1};
+					) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() - 1) and p1.GetZ() = point.GetZ()) then 
+					(
+						neighboursSet := neighboursSet union {p1};
+					) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() + 1) and p1.GetZ() = point.GetZ()) then 
+					(
+						neighboursSet := neighboursSet union {p1};
+					);
+					if(point.GetDesc() = <Stair> or point.GetDesc() = <Elevator>) then(
+						if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()+1)) then 
+						(
+							neighboursSet := neighboursSet union {p1};
+						) else if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()-1)) then 
+						(
+							neighboursSet := neighboursSet union {p1};
+						);
+					)
 			);
 			return neighboursSet;
 		)
