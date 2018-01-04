@@ -8,8 +8,8 @@ types
 
 		public Type = <Destination> | <Origin> | <Null> | <Wc> | <Coffe> | <Stair> | <Elevator> | <Wall>
 instance variables
-		private position : Position;
-		private description : Type;
+		public position : Position;
+		public description : Type;
 operations
 	-- Create point of interest
 	public PointOfInterest : nat * nat * nat * PointOfInterest`Type  ==> PointOfInterest
