@@ -23,13 +23,15 @@ operations
 		SetY(y) == (position.y := y;); 
 	public SetZ : nat ==> ()
 		SetZ(z) == (position.z := z;); 
+	public SetDesc : PointOfInterest`Type ==> ()
+		SetDesc(desc) == (description := desc;); 
 	public GetX : () ==> nat
 		GetX() == (return position.x;);
 	public GetY : () ==> nat
 		GetY() == (return position.y;);
 	public GetZ : () ==> nat
 		GetZ() == (return position.z;);
-	public GetDesc : () ==> Type
+	public GetDesc : () ==> PointOfInterest`Type
 		GetDesc() == (return description;);
 	
 	-- Change position and Description of point of interest 
