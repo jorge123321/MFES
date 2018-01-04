@@ -113,14 +113,16 @@ operations
 		--		(
 		--			dcl pathToStair: seq of PointOfInterest := [];
 		--			dcl tempDest : PointOfInterest;
-		--			pathToStair := checkNearestPath(<Stair>);
+		--			pathToStair := getPathToClosestType(<Stair>);
+		--			if(pathToStair <> {}) then(
 		--			for all p in set pathToStair do(
 		--				if(p.GetDesc() = <Destination>) then 
 		--				(
 		--					tempDest := p;
 		--				)
 		--			);					
-		--		return indoorFinderZ(pathToStair, tempDest);	
+		--		return indoorFinderZ(pathToStair, tempDest);
+		--		) -- else printf('impossible')??
 		--		);				
 		--	);
 			
@@ -133,22 +135,21 @@ operations
 		--			return pointSeq;
 		--		)else
 		--		(
-		--			pointSeq := pointSeq union checkNearestPath(<Stair>); --funçao a fazer igual para stair e elevator
-		--		)		
-		--		
+		--			dcl pathToStair: seq of PointOfInterest := [];
+		--			dcl tempDest : PointOfInterest;
+		--			pathToStair := getPathToClosestType(<Stair>);
+		--			if(pathToStair <> {}) then(
+		--			for all p in set pathToStair do(
+		--				if(p.GetDesc() = <Destination>) then 
+		--				(
+		--					tempDest := p;
+		--				)
+		--			);					
+		--		return indoorFinderZ(pathToStair, tempDest);
+		--		) -- else printf('impossible')??
+		--		);				
 		--	);
 			
-			
-		public sameZ: PointOfInterest * PointOfInterest ==> bool
-		sameZ(p1, p2) == (
-			if(p1.GetZ() = p2.GetZ()) then (
-				return true;
-			) else (
-				return false;
-			)
-		);
-			
-		
 		
 	--utility function to check if a point has the same coords as another point
 	public sameCoords: PointOfInterest * PointOfInterest ==> bool
@@ -349,9 +350,9 @@ operations
 				
 		--GET SHORTEST ACCESSIBLE PATH 
 		
-		--GET CLOSER TYPE OF EQUIPMENT
-		public getPathToClosestEquipment : PointOfInterest`Type ==> seq of PointOfInterest
-			getPathToClosestEquipment(type) == (
+		--GET CLOSER TYPE
+		public getPathToClosestType : PointOfInterest`Type ==> seq of PointOfInterest
+			getPathToClosestType(type) == (
 				for all p1 in set dom dist do (
 					if(p1.GetDesc() = type) then (
 						destination := p1;
