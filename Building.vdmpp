@@ -3,23 +3,23 @@ types
 	 public Points = set of PointOfInterest;
 	 public Transports = set of Transport;
 	 public Equipments = set of Equipment;
-<<<<<<< HEAD
 	 public Edge = set of PointOfInterest
-	 inv e == card(e)=2;
-	 
-   --public Wgraph :: e : Edge
-			--					 w : Weight;
-=======
+  	inv e == card(e)=2;
+   public Weight = int;
+  
+	 public Graph :: e : Edge
+	 									w : Weight;
+	 	 
+
 	 
 
 values
 	public min_lines : int = 3;
-	public max_lines : int = 9;
+	public max_lines : int = 5;
 	public min_columns : int = 3;
-	public max_columns : int = 9;
+	public max_columns : int = 5;
 	public min_floors : int = 1;
-	public max_floors : int = 2;
->>>>>>> 822a6a1543e93b4d9dd367bc4f67a573dd39d12b
+	public max_floors : int = 1;
 
 instance variables
 	public points : Points := {};
@@ -34,9 +34,10 @@ instance variables
  	public dist: map PointOfInterest to nat := {|->};
  	public pred: map PointOfInterest to PointOfInterest := {|->};
  	public edges : set of Points := {};
+ 	public weights : set of nat := {1};
+ 	public graph : set of Graph := {};
+ 	public wgraph : set of Graph := {};
 
-
-	
 
 functions
 	-- checks if we're only moving 1 position at a time, ie one move on the x left or right, one move on y up or down and one move on z up or down
@@ -49,9 +50,39 @@ functions
 				(deltaX = 0 and deltaY = 1 and deltaZ = 0) or
 				(deltaX = 0 and deltaY = -1 and deltaZ = 0)
 			);
+			
+	public IsShortestPath: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
+	 IsShortestPath(dist, pred, C, s, graph,points) == 
+	 	DefinesShortestDist(dist, pred, C, s, graph) and	SetOfLinkedVertices(C,s,graph, points);	 
+		
+	public DefinesShortestDist: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph -> bool
+ 	DefinesShortestDist(dist, pred, C, s, graph) == 
+ 	(dist(s)=0 and 
+ 		forall u in set C\{s} & (exists v in set C & (
+ 			pred(u)=v and neighbour(graph, u, v) and
+ 			let tup in set graph be st tup.e={u,v} in (dist(u)=dist(v)+tup.w)))
+ 		and
+ 		forall u1, v in set C & (neighbour(graph, u1, v) =>
+ 				let tup in set graph be st tup.e={u1,v} in (dist(u1)<=dist(v)+tup.w))
+ );
+ 
+ public SetOfLinkedVertices: set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
+ 	SetOfLinkedVertices(C,s,graph,points) ==
+ 	(forall u in set C & (forall v in set points & neighbour(graph, u, v) => v in set C) and
+ 		forall u1 in set C\{s} & (exists v in set C & neighbour(graph, u1, v))
+ 	);
+ 	
+ 	public neighbour: set of Graph * PointOfInterest * PointOfInterest	-> bool
+		neighbour(wg, i, j) ==
+ 		exists tup in set wg & (tup.e={i,j} and tup.w>0);
 
 operations
 
+	public getPoints:() ==> Points
+		getPoints() == (
+			return points;
+		);
+		
 	--create a building
 	public Building:() ==> Building
 	Building() == (		
@@ -67,9 +98,21 @@ operations
 			)
 		);
 		
-			let vert = power(points) in (
-				let tempedges = { e | e in set vert & card(e)=2} in(
-					edges := tempedges; 
+			--for all p in set points do (
+			--	let neighbours = {n | n in set getNeighbours(p)} in(
+			--		let edges={mk_Edge(p,n) | p in set points,
+			--	)
+			--);
+			for all p in set points do(
+				let tedges = {{p,e2}| e2 in set getNeighbours(p) & e2.GetDesc() <> <Wall>} in(
+				
+					edges := edges union tedges;
+				)
+			);
+			
+			let tedges = {e | e in set edges} in(
+				let tgraph = {mk_Graph(e,w) | e in set edges, w in set weights} in (
+					graph := tgraph;
 				)
 			)
 		);
@@ -83,35 +126,42 @@ operations
 			C := C union {s};
 			dist := dist ++ {s|->0};
 			pred := dist ++ {s|->s};
+			wgraph := graph;
+			
 			
 			while(C inter Q <> {}) do (
 				let u in set C inter Q be st (forall u1 in set C inter Q & dist(u)<=dist(u1)) in (
 					Q := Q\{u};
 				
 					for all v in set Q do(
-						--if(v in set getNeighbours(u)) then(
-							let length=dist(u)+1 in(
-								if v in set C then(
-									if length < dist(v) then(
-										dist := dist ++ {v|->length};
-										pred := pred ++ {v|-> u};
+						if(u in set getNeighbours(v)) then(
+							let uv in set wgraph be st uv.e={u,v} in(
+								if uv.w > 0 then (
+									let length=dist(u)+uv.w in(
+										if v in set C then(
+											if length < dist(v) then(
+												dist := dist ++ {v|->length};
+												pred := pred ++ {v|-> u};
+											)
+										)
+										else (
+											dist := dist ++ {v|->length};
+											pred := pred ++ {v|->u};
+											C := C union {v};
+										)
 									)
 								)
-								else (
-									dist := dist ++ {v|->length};
-									pred := pred ++ {v|->u};
-									C := C union {v};
-								)
 							)
-						--)
+						)
 					);				
 				)
 			);
 			return mk_(C,dist,pred);
-	);
+	)
 	
-		
-	-- Add an origin point to the building for the algorithm 
+	post IsShortestPath(dist, pred, C, s, graph,points);
+	
+		-- Add an origin point to the building for the algorithm 
 	public addOrigin: nat * nat * nat ==> bool
 		addOrigin(x,y,z) == (
 			for all p in set points do (
