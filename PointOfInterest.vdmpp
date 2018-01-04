@@ -4,7 +4,7 @@ types
 		public Position :: x: nat
 											y: nat
 											z: nat
-											inv pos == pos.x >= 0 and pos.x <= 10 and pos.y >= 0 and pos.y <= 10 and pos.z >= 0 and pos.z <= 2;
+											inv pos == pos.x >= 0 and pos.x <= 9 and pos.y >= 0 and pos.y <= 9 and pos.z >= 0 and pos.z <= 2;
 
 instance variables
 		private position : Position;
@@ -15,7 +15,6 @@ operations
 	PointOfInterest(x,y,z,desc) == (
 		position := mk_Position(x,y,z);
 	  description := desc;
-	  return self;
 	);
 	public SetX: nat ==> () 
 		SetX(x) == (position.x := x;); 
