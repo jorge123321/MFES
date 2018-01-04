@@ -271,7 +271,7 @@ operations
 	public addOrigin: nat * nat * nat ==> bool
 		addOrigin(x,y,z) == (
 			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
 				then (
 					p.changePoint(x,y, z, <Origin>);
 					origin := p;
@@ -287,7 +287,7 @@ operations
 	public addDestination: nat * nat * nat ==> bool
 		addDestination(x,y,z) == (
 			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
 				then (
 					p.changePoint(x,y, z, <Destination>);
 					destination := p;
@@ -303,7 +303,7 @@ operations
 		public addType: nat * nat * nat * PointOfInterest`Type==> bool
 		addType(x,y,z,type) == (
 			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
 				then (
 					p.changePoint(x,y,z, type);
 					return true;
@@ -316,7 +316,7 @@ operations
 	public changeOrigin: nat * nat * nat ==> bool
 		changeOrigin(x,y,z) == (
 			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
 				then (
 					resetOrigin();
 					p.changePoint(x,y, z, <Origin>);
@@ -333,7 +333,7 @@ operations
 	public changeDestination: nat * nat * nat ==> bool
 		changeDestination(x,y,z) == (
 			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
 				then (
 					resetDestination();
 					p.changePoint(x,y, z, <Origin>);
@@ -355,27 +355,31 @@ operations
 		pre p in set points;
 		
 		--RESET Origin
-		public resetOrigin: () ==> ()
+		public resetOrigin: () ==> bool
 			resetOrigin() == (
 				for all p in set points do(
-					if p.GetDesc() = <Origin>
+					if (p.GetDesc() = <Origin>)
 					then (
 						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
+						return true;
 					)
 				);
+				return false;
 			)
-			pre hasOrigin(points) and validPosition(x,y,z)
+			pre hasOrigin(points)
 			post not hasOrigin(points);
 			
 		--RESET Destination
-		public resetDestination: () ==> ()
+		public resetDestination: () ==> bool
 			resetDestination() == (
 				for all p in set points do(
-					if p.GetDesc() = <Destination>
+					if (p.GetDesc() = <Destination>)
 					then (
 						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
+						return true;
 					)
 				);
+				return false;
 			)
 			pre hasDestination(points)
 			post not hasDestination(points);
