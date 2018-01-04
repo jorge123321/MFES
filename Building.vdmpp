@@ -30,7 +30,7 @@ instance variables
 
 
 functions
-	-- checks if we're only moving 1 position at a time, ie one move on the x left or right, one move on y up or down and one move on z up or down
+	-- CHECK if we're only moving 1 position at a time, ie one move on the x left or right, one move on y up or down and one move on z up or down
 	public moveIsValid : nat * nat * nat -> bool
 			moveIsValid(deltaX, deltaY, deltaZ) == (
 				(deltaX = 0 and deltaY = 0 and deltaZ = 1) or
@@ -41,7 +41,7 @@ functions
 				(deltaX = 0 and deltaY = -1 and deltaZ = 0)
 			);
 	
-	-- check If result is the Shortest Path	
+	-- CHECK If result is the Shortest Path	
 	public IsShortestPath: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
 	 IsShortestPath(dist, pred, C, s, graph,points) == 
 	 	DefinesShortestDist(dist, pred, C, s, graph) and	SetOfLinkedVertices(C,s,graph, points);	 
@@ -67,26 +67,26 @@ functions
 		neighbour(wg, i, j) ==
  		exists tup in set wg & (tup.e={i,j} and tup.w>0 and j.description <> <Wall>);
  					
-		-- checks if building has origin defined
+		-- CHECK if building has origin defined
 		public hasOrigin : Points -> bool
 			hasOrigin(points) == (
 				exists p in set points & p.description = <Origin>
 			);
 			
-			-- checks if building has destination defined
+			-- CHECK if building has destination defined
 		public hasDestination : Points -> bool
 			hasDestination(points) == (
 				exists p in set points & p.description = <Destination>
 			);
 
 operations
-
+	
 	public getPoints:() ==> Points
 		getPoints() == (
 			return points;
 		);
 		
-	--create a building
+	--CREATE a building
 	public Building:() ==> Building
 	Building() == (		
 		for i = 0 to (max_lines - 1) do
@@ -151,7 +151,7 @@ operations
 		--	);
 			
 		
-	--utility function to check if a point has the same coords as another point
+	--CHECK if a point has the same coords as another point
 	public sameCoords: PointOfInterest * PointOfInterest ==> bool
 		sameCoords(p1, p2) == (
 			if(p1.GetX() = p2.GetX() and p1.GetY() = p2.GetY() and p1.GetZ() = p2.GetZ()) then (
@@ -161,7 +161,7 @@ operations
 			)
 		);
 		
-	--make path from origin to dest
+	--MAKE path from origin to dest
 	public makePath: () ==> seq of PointOfInterest
 		makePath() == (
 			dcl pathToDest: seq of PointOfInterest := [];
@@ -190,7 +190,7 @@ operations
 			);
 		);
 
-	--Dijkstra
+	--Dijkstra Algorithm
 	--public dijkstra: PointOfInterest ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
 		--dijkstra(s) == (
 	public dijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
@@ -210,11 +210,13 @@ operations
 				)
 			);
 			
+			dist := {|->};
+			pred := {|->};
 			s := origin;
 			Q := points;
 			C := C union {s};
-			dist := dist ++ {s|->0}; --TODO RESET BOTH BEFORE THIS
-			pred := dist ++ {s|->s}; --TODO RESET BOTH BEFORE THIS
+			dist := dist ++ {s|->0}; 
+			pred := dist ++ {s|->s}; 
 				
 			while(C inter Q <> {}) do (
 				let u in set C inter Q be st (forall u1 in set C inter Q & dist(u)<=dist(u1)) in (
@@ -250,7 +252,7 @@ operations
 	pre hasOrigin(points) and hasDestination(points)
 	post IsShortestPath(dist, pred, C, s, graph,points);
 			
-	-- Add a point to the building
+	-- ADD a point to the building
 	public addPoint: PointOfInterest ==> ()
 		addPoint(P) == (
 				points := points union {P};
@@ -259,7 +261,7 @@ operations
 		pre P not in set points
 		post P in set points;
 			
-	-- Add an origin point to the building
+	-- ADD an origin point to the building
 	public addOrigin: nat * nat * nat ==> bool
 		addOrigin(x,y,z) == (
 			for all p in set points do (
@@ -275,7 +277,7 @@ operations
 		pre  not hasOrigin(points)
 		post hasOrigin(points);
 		
-	-- Add a destination point to the building 
+	-- ADD a destination point to the building 
 	public addDestination: nat * nat * nat ==> bool
 		addDestination(x,y,z) == (
 			for all p in set points do (
@@ -291,7 +293,7 @@ operations
 		pre  not hasDestination(points)
 		post hasDestination(points);
 		
-	-- Add a type to a point in the building
+	-- ADD a type to a point in the building
 		public addType: nat * nat * nat * PointOfInterest`Type==> bool
 		addType(x,y,z,type) == (
 			for all p in set points do (
@@ -303,8 +305,42 @@ operations
 			);
 			return false;
 		);
-
-	-- Change X Y Z and Description of point of interest 
+		
+	-- CHANGE Origin point to the building
+	public changeOrigin: nat * nat * nat ==> bool
+		changeOrigin(x,y,z) == (
+			for all p in set points do (
+				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				then (
+					resetOrigin();
+					p.changePoint(x,y, z, <Origin>);
+					origin := p;
+					return true;
+				)
+			);
+			return false;
+		)
+		pre  hasOrigin(points)
+		post hasOrigin(points);
+		
+	-- CHANGE Destination point to the building
+	public changeDestination: nat * nat * nat ==> bool
+		changeDestination(x,y,z) == (
+			for all p in set points do (
+				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				then (
+					resetDestination();
+					p.changePoint(x,y, z, <Origin>);
+					origin := p;
+					return true;
+				)
+			);
+			return false;
+		)
+		pre  hasDestination(points)
+		post hasDestination(points);
+				
+	-- CHANGE X Y Z and Description of point of interest 
 	public changePoint: PointOfInterest*nat*nat*nat*PointOfInterest`Type ==> ()
 		changePoint(p,newx, newy, newz, newdesc) == (
 			p.changePoint(newx, newy, newz, newdesc);
@@ -312,7 +348,34 @@ operations
 		)
 		pre p in set points;
 		
-		--checks is x,y,z is valid position (its on points)
+		--RESET Origin
+		public resetOrigin: () ==> ()
+			resetOrigin() == (
+				for all p in set points do(
+					if p.GetDesc() = <Origin>
+					then (
+						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
+					)
+				);
+			)
+			pre hasOrigin(points)
+			post not hasOrigin(points);
+			
+		--RESET Destination
+		public resetDestination: () ==> ()
+			resetDestination() == (
+				for all p in set points do(
+					if p.GetDesc() = <Destination>
+					then (
+						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
+					)
+				);
+			)
+			pre hasDestination(points)
+			post not hasDestination(points);
+
+		
+		--CHECK if x,y,z is valid position (its on points)
 	public validPosition : nat * nat * nat ==> bool
 		validPosition(x,y,z) == (
 			if(x >= 0 and x <= max_lines and y >= min_columns and y <= max_columns and z >= min_floors and z <= max_floors) then
@@ -323,7 +386,7 @@ operations
 			)
 		);
 	
-	-- get all positions next to a Point
+	-- GET all positions next to a Point
 	public getNeighbours : PointOfInterest ==> set of PointOfInterest
 		getNeighbours(point) == (
 			dcl neighboursSet : set of PointOfInterest := {};
@@ -355,9 +418,8 @@ operations
 		)
 		pre points <> {};
 				
-		--GET SHORTEST ACCESSIBLE PATH 
 		
-		--GET CLOSER TYPE
+		--GET closer type
 		public getPathToClosestType : PointOfInterest`Type ==> seq of PointOfInterest
 			getPathToClosestType(type) == (
 				for all p1 in set dom dist do (
