@@ -79,6 +79,12 @@ functions
 				exists p in set points & p.description = <Destination>
 			);
 
+		
+		--CHECK if x,y,z is valid position (its on points)
+		public validPosition : nat * nat * nat -> bool
+		validPosition(x,y,z) == (
+			(x >= 0 and x <= max_lines and y >= min_columns and y <= max_columns and z >= min_floors and z <= max_floors)
+			);
 operations
 	
 	public getPoints:() ==> Points
@@ -274,7 +280,7 @@ operations
 			);
 			return false;
 		)
-		pre  not hasOrigin(points)
+		pre  not hasOrigin(points) and validPosition(x,y,z)
 		post hasOrigin(points);
 		
 	-- ADD a destination point to the building 
@@ -290,7 +296,7 @@ operations
 			);
 			return false;
 		)
-		pre  not hasDestination(points)
+		pre  not hasDestination(points) and validPosition(x,y,z)
 		post hasDestination(points);
 		
 	-- ADD a type to a point in the building
@@ -304,7 +310,7 @@ operations
 				)
 			);
 			return false;
-		);
+		) pre validPosition(x,y,z);
 		
 	-- CHANGE Origin point to the building
 	public changeOrigin: nat * nat * nat ==> bool
@@ -320,7 +326,7 @@ operations
 			);
 			return false;
 		)
-		pre  hasOrigin(points)
+		pre  hasOrigin(points) and validPosition(x,y,z)
 		post hasOrigin(points);
 		
 	-- CHANGE Destination point to the building
@@ -337,7 +343,7 @@ operations
 			);
 			return false;
 		)
-		pre  hasDestination(points)
+		pre  hasDestination(points) and validPosition(x,y,z)
 		post hasDestination(points);
 				
 	-- CHANGE X Y Z and Description of point of interest 
@@ -358,7 +364,7 @@ operations
 					)
 				);
 			)
-			pre hasOrigin(points)
+			pre hasOrigin(points) and validPosition(x,y,z)
 			post not hasOrigin(points);
 			
 		--RESET Destination
@@ -374,17 +380,6 @@ operations
 			pre hasDestination(points)
 			post not hasDestination(points);
 
-		
-		--CHECK if x,y,z is valid position (its on points)
-	public validPosition : nat * nat * nat ==> bool
-		validPosition(x,y,z) == (
-			if(x >= 0 and x <= max_lines and y >= min_columns and y <= max_columns and z >= min_floors and z <= max_floors) then
-			(
-				return true;
-			) else (
-				return false;
-			)
-		);
 	
 	-- GET all positions next to a Point
 	public getNeighbours : PointOfInterest ==> set of PointOfInterest
@@ -429,6 +424,7 @@ operations
 					)
 				);
 				return [];
-			);
+			)
+			pre dist <> {|->};
 	
 end Building
