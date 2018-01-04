@@ -5,13 +5,14 @@ types
 											y: nat
 											z: nat
 											inv pos == pos.x >= 0 and pos.x <= 10 and pos.y >= 0 and pos.y <= 10 and pos.z >= 0 and pos.z <= 2;
+		public Type = <Destination> | <Origin> | <Null> | <Wc> | <Coffe> | <Stair> | <Elevator>
 
 instance variables
 		private position : Position;
-		private description : Desc;
+		private description : Type;
 operations
 	-- Create point of interest
-	public PointOfInterest : nat * nat * nat * PointOfInterest`Desc  ==> PointOfInterest
+	public PointOfInterest : nat * nat * nat * PointOfInterest`Type  ==> PointOfInterest
 	PointOfInterest(x,y,z,desc) == (
 		position := mk_Position(x,y,z);
 	  description := desc;
@@ -29,11 +30,11 @@ operations
 		GetY() == (return position.y;);
 	public GetZ : () ==> nat
 		GetZ() == (return position.z;);
-	public GetDesc : () ==> Desc
+	public GetDesc : () ==> Type
 		GetDesc() == (return description;);
 	
 	-- Change position and Description of point of interest 
-	public changePoint : nat * nat * nat * PointOfInterest`Desc ==> ()
+	public changePoint : nat * nat * nat * PointOfInterest`Type ==> ()
 		changePoint(x, y, z, newDesc) == (
 			position.x := x;
 			position.y := y;

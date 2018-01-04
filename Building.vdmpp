@@ -3,12 +3,28 @@ types
 	 public Points = set of PointOfInterest;
 	 public Transports = set of Transport;
 	 public Equipments = set of Equipment;
+	 public Edge = set of PointOfInterest
+	 inv e == card(e)=2;
+	 
+   --public Wgraph :: e : Edge
+			--					 w : Weight;
 
 instance variables
 	public points : Points := {};
 	public transports : Transports := {};
 	public equipments : Equipments := {};
-	public path : set of PointOfInterest := {};
+	public path : Points := {};
+	public origin : PointOfInterest;
+	public destination : PointOfInterest;
+	public s : PointOfInterest;
+	public C: Points := {};
+ 	public Q: Points := {}; -- := points??
+ 	public dist: map PointOfInterest to nat := {|->};
+ 	public pred: map PointOfInterest to PointOfInterest := {|->};
+ 	public edges : set of Points := {};
+
+
+	
 
 functions
 	-- checks if we're only moving 1 position at a time, ie one move on the x left or right, one move on y up or down and one move on z up or down
@@ -33,36 +49,80 @@ operations
 			(
 					for k = 0 to 2 do 
 					(
-						dcl point: PointOfInterest := new PointOfInterest(i,j,k,"path");
+						dcl point: PointOfInterest := new PointOfInterest(i,j,k,<Null>);
 						addPoint(point);
 					)
 			)
 		);
+		
+			let vert = power(points) in (
+				let tempedges = { e | e in set vert & card(e)=2} in(
+					edges := tempedges; 
+				)
+			)
 		);
 		
 		
-	-- Add an origin point to the building for the algorithm
+	--Dijkstra
+	public dijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+		dijkstra() == (
+			Q := points;
+			s := origin;
+			C := C union {s};
+			dist := dist ++ {s|->0};
+			pred := dist ++ {s|->s};
+			
+			while(C inter Q <> {}) do (
+				let u in set C inter Q be st (forall u1 in set C inter Q & dist(u)<=dist(u1)) in (
+					Q := Q\{u};
+				
+					for all v in set Q do(
+						--if(v in set getNeighbours(u)) then(
+							let length=dist(u)+1 in(
+								if v in set C then(
+									if length < dist(v) then(
+										dist := dist ++ {v|->length};
+										pred := pred ++ {v|-> u};
+									)
+								)
+								else (
+									dist := dist ++ {v|->length};
+									pred := pred ++ {v|->u};
+									C := C union {v};
+								)
+							)
+						--)
+					);				
+				)
+			);
+			return mk_(C,dist,pred);
+	);
+	
+		
+	-- Add an origin point to the building for the algorithm 
 	public addOrigin: nat * nat * nat ==> bool
 		addOrigin(x,y,z) == (
 			for all p in set points do (
 				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
 				then (
-					changePoint(p, x, y, z, "origin");
+					changePoint(p, x, y, z, <Origin>);
+					origin := p;
 					return true;
 				)
 			);
 			return false;
 		);
-		--pre P in set points --TODO: maybe check that the point CAN be set as origin? like it's a clear path or not a wall
-		--post P in set points; --TODO: maybe check that the point WAS set as origin? like it's description indicates origin
+		--pre --TODO: maybe check that the point CAN be set as origin? like it's a clear path or not a wall
+		--post --TODO: maybe check that the point WAS set as origin? like it's description indicates origin
 		
-	-- Add an origin point to the building for the algorithm
+	-- Add an origin point to the building for the algorithm 
 	public addDestination: nat * nat * nat ==> bool
 		addDestination(x,y,z) == (
 			for all p in set points do (
 				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
 				then (
-					changePoint(p, x, y, z, "destination");
+					changePoint(p, x, y, z, <Destination>);
+					destination := p;
 					return true;
 				)
 			);
@@ -76,7 +136,7 @@ operations
 			hasDestination() == (
 				dcl pointsDestination : Points := {};
 				for all p in set points do (
-					if p.GetDesc() = "destination"
+					if p.GetDesc() = <Destination>
 					then (
 						pointsDestination := pointsDestination union {p};
 					)
@@ -91,7 +151,7 @@ operations
 			hasOrigin() == (
 				dcl pointsOrigin : Points := {};
 				for all p in set points do (
-					if p.GetDesc() = "origin"
+					if p.GetDesc() = <Origin>
 					then (
 						pointsOrigin := pointsOrigin union {p};
 					)
@@ -129,7 +189,7 @@ operations
 		post E in set equipments;
 		
 	-- Change X Y Z and Description of point of interest 
-	public changePoint: PointOfInterest*nat*nat*nat*PointOfInterest`Desc ==> ()
+	public changePoint: PointOfInterest*nat*nat*nat*PointOfInterest`Type ==> ()
 		changePoint(P,newx, newy, newz, newdesc) == (
 			P.changePoint(newx, newy,newz,newdesc);
 			return;
