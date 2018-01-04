@@ -65,7 +65,7 @@ functions
  	
  	public neighbour: set of Graph * PointOfInterest * PointOfInterest	-> bool
 		neighbour(wg, i, j) ==
- 		exists tup in set wg & (tup.e={i,j} and tup.w>0);
+ 		exists tup in set wg & (tup.e={i,j} and tup.w>0 and j.description <> <Wall>);
  					
 		-- checks if building has origin defined
 		public hasOrigin : Points -> bool
