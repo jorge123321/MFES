@@ -293,5 +293,15 @@ operations
 		--GET SHORTEST ACCESSIBLE PATH 
 		
 		--GET CLOSER TYPE OF EQUIPMENT
+		public getPathToClosestEquipment : PointOfInterest`Type ==> seq of PointOfInterest
+			getPathToClosestEquipment(type) == (
+				for all p1 in set dom dist do (
+					if(p1.GetDesc() = type) then (
+						destination := p1;
+						return makePath();
+					)
+				);
+				return [];
+			);
 	
 end Building

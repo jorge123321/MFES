@@ -6,7 +6,7 @@ types
 											z: nat
 											inv pos == pos.x >= 0 and pos.x <= 9 and pos.y >= 0 and pos.y <= 9 and pos.z >= 0 and pos.z <= 2;
 
-		public Type = <Destination> | <Origin> | <Null> | <Wc> | <Coffe> | <Stair> | <Elevator> | <Wall>
+		public Type = <Destination> | <Origin> | <Null> | <Wc> | <Coffee> | <Stair> | <Elevator> | <Wall>
 instance variables
 		public position : Position;
 		public description : Type;
