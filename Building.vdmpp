@@ -3,11 +3,23 @@ types
 	 public Points = set of PointOfInterest;
 	 public Transports = set of Transport;
 	 public Equipments = set of Equipment;
+<<<<<<< HEAD
 	 public Edge = set of PointOfInterest
 	 inv e == card(e)=2;
 	 
    --public Wgraph :: e : Edge
 			--					 w : Weight;
+=======
+	 
+
+values
+	public min_lines : int = 3;
+	public max_lines : int = 9;
+	public min_columns : int = 3;
+	public max_columns : int = 9;
+	public min_floors : int = 1;
+	public max_floors : int = 2;
+>>>>>>> 822a6a1543e93b4d9dd367bc4f67a573dd39d12b
 
 instance variables
 	public points : Points := {};
@@ -43,11 +55,11 @@ operations
 	--create a building
 	public Building:() ==> Building
 	Building() == (		
-		for i = 0 to 9 do
+		for i = 0 to (max_lines - 1) do
 		(
-			for j = 0 to 9 do
+			for j = 0 to (max_columns - 1) do
 			(
-					for k = 0 to 2 do 
+					for k = 0 to (max_floors - 1) do 
 					(
 						dcl point: PointOfInterest := new PointOfInterest(i,j,k,<Null>);
 						addPoint(point);
@@ -262,6 +274,40 @@ operations
 			) 
 		pre equipments <> {}
 		post equipments = {};
+		
+	public validPosition : nat * nat * nat ==> bool
+		validPosition(x,y,z) == (
+			if(x >= 0 and x <= max_lines and y >= min_columns and y <= max_columns and z >= min_floors and z <= max_floors) then
+			(
+				return true;
+			) else (
+				return false;
+			)
+		);
+		
+	public getNeighbours : PointOfInterest ==> set of PointOfInterest
+		getNeighbours(point) == (
+			dcl neighboursSet : set of PointOfInterest := {};
+			for all p1 in set points do (
+				if(p1.GetX() = (point.GetX() - 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then
+				(
+					neighboursSet := neighboursSet union {p1};
+				) else if (p1.GetX() = (point.GetX() + 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then 
+				(
+					neighboursSet := neighboursSet union {p1};
+				) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() - 1) and p1.GetZ() = point.GetZ()) then 
+				(
+					neighboursSet := neighboursSet union {p1};
+				) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() + 1) and p1.GetZ() = point.GetZ()) then 
+				(
+					neighboursSet := neighboursSet union {p1};
+				)
+			);
+			return neighboursSet;
+		);
+		--pre condition point in points of building?
+		--post condition all points of returned set are in points of building
+		
 		
 		--GET SHORTEST PATH P1 TO P2		
 		
