@@ -1,17 +1,11 @@
 class Building
 types
-	 public Points = set of PointOfInterest;
-	 public Transports = set of Transport;
-	 public Equipments = set of Equipment;
+	 public Points = set of PointOfInterest;	 
 	 public Edge = set of PointOfInterest
-  	inv e == card(e)=2;
+  	inv e == card(e)=2;  	
    public Weight = int;
-  
 	 public Graph :: e : Edge
 	 									w : Weight;
-	 	 
-
-	 
 
 values
 	public min_lines : int = 3;
@@ -19,24 +13,20 @@ values
 	public min_columns : int = 3;
 	public max_columns : int = 5;
 	public min_floors : int = 1;
-	public max_floors : int = 1;
+	public max_floors : int = 2;
 
 instance variables
 	public points : Points := {};
-	public transports : Transports := {};
-	public equipments : Equipments := {};
-	public path : Points := {};
 	public origin : PointOfInterest;
 	public destination : PointOfInterest;
 	public s : PointOfInterest;
 	public C: Points := {};
- 	public Q: Points := {}; -- := points??
+ 	public Q: Points := {};
  	public dist: map PointOfInterest to nat := {|->};
  	public pred: map PointOfInterest to PointOfInterest := {|->};
  	public edges : set of Points := {};
  	public weights : set of nat := {1};
  	public graph : set of Graph := {};
- 	public wgraph : set of Graph := {};
 
 
 functions
@@ -50,7 +40,8 @@ functions
 				(deltaX = 0 and deltaY = 1 and deltaZ = 0) or
 				(deltaX = 0 and deltaY = -1 and deltaZ = 0)
 			);
-			
+	
+	-- check If result is the Shortest Path	
 	public IsShortestPath: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
 	 IsShortestPath(dist, pred, C, s, graph,points) == 
 	 	DefinesShortestDist(dist, pred, C, s, graph) and	SetOfLinkedVertices(C,s,graph, points);	 
@@ -75,6 +66,18 @@ functions
  	public neighbour: set of Graph * PointOfInterest * PointOfInterest	-> bool
 		neighbour(wg, i, j) ==
  		exists tup in set wg & (tup.e={i,j} and tup.w>0);
+ 					
+		-- checks if building has origin defined
+		public hasOrigin : Points -> bool
+			hasOrigin(points) == (
+				exists p in set points & p.description = <Origin>
+			);
+			
+			-- checks if building has destination defined
+		public hasDestination : Points -> bool
+			hasDestination(points) == (
+				exists p in set points & p.description = <Destination>
+			);
 
 operations
 
@@ -98,11 +101,6 @@ operations
 			)
 		);
 		
-			--for all p in set points do (
-			--	let neighbours = {n | n in set getNeighbours(p)} in(
-			--		let edges={mk_Edge(p,n) | p in set points,
-			--	)
-			--);
 			for all p in set points do(
 				let tedges = {{p,e2}| e2 in set getNeighbours(p) & e2.GetDesc() <> <Wall>} in(
 				
@@ -148,8 +146,7 @@ operations
 			);
 			return pathToDest;
 		);
-		
-		
+
 	--Dijkstra
 	public dijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
 		dijkstra() == (
@@ -158,16 +155,14 @@ operations
 			C := C union {s};
 			dist := dist ++ {s|->0};
 			pred := dist ++ {s|->s};
-			wgraph := graph;
-			
-			
+				
 			while(C inter Q <> {}) do (
 				let u in set C inter Q be st (forall u1 in set C inter Q & dist(u)<=dist(u1)) in (
 					Q := Q\{u};
 				
 					for all v in set Q do(
 						if(u in set getNeighbours(v)) then(
-							let uv in set wgraph be st uv.e={u,v} in(
+							let uv in set graph be st uv.e={u,v} in(
 								if uv.w > 0 then (
 									let length=dist(u)+uv.w in(
 										if v in set C then(
@@ -190,71 +185,9 @@ operations
 			);
 			return mk_(C,dist,pred);
 	)
-	--pre hasOrigin() --it's giving an error of impure hasOrigin
+	pre hasOrigin(points) and hasDestination(points)
 	post IsShortestPath(dist, pred, C, s, graph,points);
-	
-		-- Add an origin point to the building for the algorithm 
-	public addOrigin: nat * nat * nat ==> bool
-		addOrigin(x,y,z) == (
-			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
-				then (
-					changePoint(p, x, y, z, <Origin>);
-					origin := p;
-					return true;
-				)
-			);
-			return false;
-		);
-		--pre --TODO: maybe check that the point CAN be set as origin? like it's a clear path or not a wall
-		--post --TODO: maybe check that the point WAS set as origin? like it's description indicates origin
-		
-	-- Add an origin point to the building for the algorithm 
-	public addDestination: nat * nat * nat ==> bool
-		addDestination(x,y,z) == (
-			for all p in set points do (
-				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
-				then (
-					changePoint(p, x, y, z, <Destination>);
-					destination := p;
-					return true;
-				)
-			);
-			return false;
-		);
-		--pre P in set points --TODO: maybe check that the point CAN be set as destination? like it's a clear path or not a wall
-		--post P in set points; --TODO: maybe check that the point WAS set as destination? like it's description indicates destination
-		
-		-- checks if building has only 1 destination point
-		public hasDestination : () ==> bool
-			hasDestination() == (
-				dcl pointsDestination : Points := {};
-				for all p in set points do (
-					if p.GetDesc() = <Destination>
-					then (
-						pointsDestination := pointsDestination union {p};
-					)
-				);
-				if card(pointsDestination) = 1 then (
-					return true;
-				) else ( return false; )
-			);
 			
-		-- checks if building has only 1 origin point
-		public hasOrigin : () ==> bool
-			hasOrigin() == (
-				dcl pointsOrigin : Points := {};
-				for all p in set points do (
-					if p.GetDesc() = <Origin>
-					then (
-						pointsOrigin := pointsOrigin union {p};
-					)
-				);
-				if card(pointsOrigin) = 1 then (
-					return true;
-				) else ( return false; )
-			);
-		
 	-- Add a point to the building
 	public addPoint: PointOfInterest ==> ()
 		addPoint(P) == (
@@ -263,100 +196,61 @@ operations
 		)
 		pre P not in set points
 		post P in set points;
-		
-	-- Add a stair to the building
-	public addTransport: Transport ==> ()
-		addTransport(T) == (
-				transports := transports union {T};
-			return;
+			
+	-- Add an origin point to the building
+	public addOrigin: nat * nat * nat ==> bool
+		addOrigin(x,y,z) == (
+			for all p in set points do (
+				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				then (
+					p.changePoint(x,y, z, <Origin>);
+					origin := p;
+					return true;
+				)
+			);
+			return false;
 		)
-		pre T not in set transports
-		post T in set transports;
+		pre  not hasOrigin(points)
+		post hasOrigin(points);
 		
-	-- Add an equipment to the building
-	public addEquipment: Equipment ==> ()
-		addEquipment(E) == (
-				equipments := equipments union {E};
-			return;
+	-- Add a destination point to the building 
+	public addDestination: nat * nat * nat ==> bool
+		addDestination(x,y,z) == (
+			for all p in set points do (
+				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				then (
+					p.changePoint(x,y, z, <Destination>);
+					destination := p;
+					return true;
+				)
+			);
+			return false;
 		)
-		pre E not in set equipments
-		post E in set equipments;
+		pre  not hasDestination(points)
+		post hasDestination(points);
 		
+	-- Add a type to a point in the building
+		public addType: nat * nat * nat * PointOfInterest`Type==> bool
+		addType(x,y,z,type) == (
+			for all p in set points do (
+				if p.GetX() = x and p.GetY() = y and p.GetZ() = z
+				then (
+					p.changePoint(x,y,z, type);
+					return true;
+				)
+			);
+			return false;
+		);
+
 	-- Change X Y Z and Description of point of interest 
 	public changePoint: PointOfInterest*nat*nat*nat*PointOfInterest`Type ==> ()
-		changePoint(P,newx, newy, newz, newdesc) == (
-			P.changePoint(newx, newy,newz,newdesc);
+		changePoint(p,newx, newy, newz, newdesc) == (
+			p.changePoint(newx, newy, newz, newdesc);
 			return;
 		)
-		pre P in set points;
-	
-	-- Change X Y, Description, DownFloor, UpFloor and Type of stair
-	public changeTransport: Transport*Transport`X * Transport`Y * Transport`Desc * Transport`DownFloor * Transport`UpFloor * Transport`Type ==> ()
-		changeTransport(T,newx, newy, newdesc, newdown, newup, newtype) == (
-			T.changeTransport(newx, newy, newdesc, newdown, newup, newtype);
-			return;
-		)
-		pre T in set transports;
+		pre p in set points;
 		
-	-- Change X Y, Z and name of equipment
-	public changeEquipment: Equipment * Equipment`X * Equipment`Y * Equipment`Z * Equipment`Name ==> ()
-		changeEquipment(E, newx, newy, newz, newname) == (
-			E.changeEquipment(newx, newy, newz, newname);
-			return;
-		)
-		pre E in set equipments;
-	
-	-- Remove point of interest
-	public removePoint: PointOfInterest ==>()
-		removePoint(P) == (
-			points := points \ {P};
-			return;
-		)
-		pre P in set points
-		post P not in set points;
-	
-	-- Remove transport
-	public removeTransport: Transport ==>()
-		removeTransport(T) == (
-			transports := transports \ {T};
-			return;
-		)
-		pre T in set transports
-		post T not in set transports;
-		
-	-- Remove equipment
-	public removeEquipment: Equipment ==>()
-		removeEquipment(E) == (
-			equipments := equipments \ {E};
-			return;
-		)
-		pre E in set equipments
-		post E not in set equipments;
-		
-		--Remove all points
-		public removePoints:() ==> ()
-			removePoints() == (
-				points := points \ points;
-			) 
-		pre points <> {}
-		post points = {};
-		
-		--Remove all transports
-		public removeTransports:() ==> ()
-			removeTransports() == (
-				transports := transports \ transports;
-			) 
-		pre transports <> {}
-		post transports = {};
-		
-		--Remove all equipments
-		public removeEquipments:() ==> ()
-			removeEquipments() == (
-				equipments := equipments \ equipments;
-			) 
-		pre equipments <> {}
-		post equipments = {};
-		
+		--checks is x,y,z is valid position (its on points)
 	public validPosition : nat * nat * nat ==> bool
 		validPosition(x,y,z) == (
 			if(x >= 0 and x <= max_lines and y >= min_columns and y <= max_columns and z >= min_floors and z <= max_floors) then
@@ -366,7 +260,8 @@ operations
 				return false;
 			)
 		);
-		
+	
+	-- get all positions next to a Point
 	public getNeighbours : PointOfInterest ==> set of PointOfInterest
 		getNeighbours(point) == (
 			dcl neighboursSet : set of PointOfInterest := {};
@@ -383,16 +278,18 @@ operations
 				) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() + 1) and p1.GetZ() = point.GetZ()) then 
 				(
 					neighboursSet := neighboursSet union {p1};
+				)else if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()+1) and (p1.GetDesc() = <Elevator> or p1.GetDesc() = <Stair>)) then 
+				(
+					neighboursSet := neighboursSet union {p1};					
+				)else if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()-1) and (p1.GetDesc() = <Elevator> or p1.GetDesc() = <Stair>)) then 
+				(
+					neighboursSet := neighboursSet union {p1};	
 				)
 			);
 			return neighboursSet;
-		);
-		--pre condition point in points of building?
-		--post condition all points of returned set are in points of building
-		
-		
-		--GET SHORTEST PATH P1 TO P2		
-		
+		)
+		pre points <> {};
+				
 		--GET SHORTEST ACCESSIBLE PATH 
 		
 		--GET CLOSER TYPE OF EQUIPMENT
