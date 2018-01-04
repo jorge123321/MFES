@@ -153,8 +153,8 @@ operations
 			Q := points;
 			s := origin;
 			C := C union {s};
-			dist := dist ++ {s|->0};
-			pred := dist ++ {s|->s};
+			dist := dist ++ {s|->0}; --TODO RESET BOTH BEFORE THIS
+			pred := dist ++ {s|->s}; --TODO RESET BOTH BEFORE THIS
 				
 			while(C inter Q <> {}) do (
 				let u in set C inter Q be st (forall u1 in set C inter Q & dist(u)<=dist(u1)) in (
@@ -185,8 +185,8 @@ operations
 			);
 			return mk_(C,dist,pred);
 	)
-	pre hasOrigin(points) and hasDestination(points)
-	post IsShortestPath(dist, pred, C, s, graph,points);
+	pre hasOrigin(points) and hasDestination(points);
+--	post IsShortestPath(dist, pred, C, s, graph,points);
 			
 	-- Add a point to the building
 	public addPoint: PointOfInterest ==> ()
@@ -278,13 +278,7 @@ operations
 				) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() + 1) and p1.GetZ() = point.GetZ()) then 
 				(
 					neighboursSet := neighboursSet union {p1};
-				)else if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()+1) and (p1.GetDesc() = <Elevator> or p1.GetDesc() = <Stair>)) then 
-				(
-					neighboursSet := neighboursSet union {p1};					
-				)else if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()-1) and (p1.GetDesc() = <Elevator> or p1.GetDesc() = <Stair>)) then 
-				(
-					neighboursSet := neighboursSet union {p1};	
-				)
+				);
 			);
 			return neighboursSet;
 		)
