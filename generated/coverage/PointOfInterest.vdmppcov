@@ -5,10 +5,11 @@ types
 											y: nat
 											z: nat;
 
-		public Type = <Destination> | <Origin> | <Null> | <Wc> | <Coffee> | <Stair> | <Elevator> | <Wall>
+		public Type = <Destination> | <Origin> | <Null> | <Wc> | <Coffee> | <Stair> | <Elevator> | <Wall> ;
+		
 instance variables
 		public position : Position;
-		public description : Type;
+		public description : Type := <Null>;
 operations
 	-- Create point of interest
 	public PointOfInterest : nat * nat * nat * PointOfInterest`Type  ==> PointOfInterest

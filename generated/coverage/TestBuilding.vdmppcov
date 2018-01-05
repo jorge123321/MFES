@@ -1,15 +1,10 @@
 class TestBuilding is subclass of MyTestCase
-types
--- TODO Define types here
-values
--- TODO Define values here
-instance variables
--- TODO Define instance variables here
 operations
 		protected assertFalse : bool ==> ()
 			assertFalse(a) == return
 				pre a = false;
 					
+		-- tests the creation of a building, and if it has an origin and a destination at the beginning which should be false since it doesn't have it!
 		public TestCreateBuilding : () ==> ()
 	 		TestCreateBuilding() == ( 
 	       	dcl b : Building := new Building(5,5,2);
@@ -17,6 +12,7 @@ operations
 	       	assertFalse(b.hasDestination(b.points));
 	  );
 	  
+	  -- tests adding an origin to the building and checking if the building has an origin after
 	  public TestAddOrigin : () ==> ()
 			TestAddOrigin() == (
 					dcl b : Building := new Building(5,5,2);
@@ -26,6 +22,7 @@ operations
 	       	assertTrue(b.hasOrigin(b.points));
 			);	  
 			
+		-- tests adding a destination to the building and checking if the building has a destination after
 		public TestAddDestination : () ==> ()
 			TestAddDestination() == (
 					dcl b : Building := new Building(5,5,2);
@@ -35,6 +32,7 @@ operations
 	       	assertTrue(b.hasDestination(b.points));
 			);	 
 			
+		-- tests changing a point type from NULL to Coffee and checking if it was changed
 		public TestAddType : () ==> ()
 			TestAddType() == (
 					dcl b : Building := new Building(5,5,2);
@@ -47,7 +45,9 @@ operations
 		     		);
 		     	);
 			);	 
-			
+		
+		-- tests finding a path between an origin (1,0,0) and a destination (3,0,0) with a wall between
+		-- and test changeOrigin and changeDestination
 		public TestMakePath : () ==> ()
 			TestMakePath() == (
 				dcl b: Building := new Building(5,5,2);
@@ -56,11 +56,18 @@ operations
 				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
 	      result := b.addOrigin(1,0,0);
 	      result := b.addDestination(3,0,0);
+	      result := b.addType(2,0,0,<Wall>);
 	      result2 := b.startDijkstra();
 	      path := b.makePath();
+	      assertEqual(len(path),5);
+	      result:= b.changeOrigin(4,4,0);
+	      result:= b.changeDestination(3,3,0);
+	      result2:= b.startDijkstra();
+	      path:= b.makePath();
 	      assertEqual(len(path),3);
 			);
-			
+		
+		-- tests if it can find a coffee nearby an origin after adding a coffee spot
 		public TestFindCoffeeNearby : () ==> ()
 			TestFindCoffeeNearby() == (
 				dcl b: Building := new Building(5,5,2);
@@ -68,9 +75,8 @@ operations
 				dcl path : seq of PointOfInterest;
 				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
 	      result := b.addOrigin(1,0,0);
+	      result := b.addDestination(3,0,0);
 	      result2 := b.startDijkstra();
-	      path := b.getPathToClosestType(<Coffee>);
-	      assertEqual(len(path),0);
 	      
 	      for all p1 in set b.points do (
 	     		if(p1.GetX() = 2 and p1.GetY() = 2 and p1.GetZ() = 0) then (
@@ -85,16 +91,28 @@ operations
 	      
 			);
 			
-		private getPointFromCoords : nat * nat * nat ==> PointOfInterest | ()
-			getPointFromCoords(x,y,z) == (
-					dcl b : Building := new Building(5,5,2);
-					dcl point : PointOfInterest;
-					for all p1 in set b.points do (
-						if(p1.GetX() = x and p1.GetY() = y and p1.GetZ() = z) then (
-							return p1;
-						);
-					);
-					return point;
+		public FailingTestMakePath : () ==> ()
+			FailingTestMakePath() == (
+				dcl b: Building := new Building(5,5,2);
+				dcl result : bool;
+				dcl path : seq of PointOfInterest;
+				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
+	      result2 := b.startDijkstra(); -- breaks pre-condition
+	      path := b.makePath();
+			);
+			
+		public FailingTestFindCoffeeNearby : () ==> ()
+			FailingTestFindCoffeeNearby() == (
+				dcl b: Building := new Building(5,5,2);
+				dcl result : bool;
+				dcl path : seq of PointOfInterest;
+				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
+	      result := b.addOrigin(1,0,0);
+	      result := b.addDestination(3,0,0);
+	      result2 := b.startDijkstra();
+	     	
+	     	path := b.getPathToClosestType(<Coffee>); -- breaks pre-condition
+	      assertEqual(len(path),4);
 			);
 			
 	  public static main: () ==> ()

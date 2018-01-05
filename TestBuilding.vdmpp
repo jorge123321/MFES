@@ -91,6 +91,30 @@ operations
 	      
 			);
 			
+		public FailingTestMakePath : () ==> ()
+			FailingTestMakePath() == (
+				dcl b: Building := new Building(5,5,2);
+				dcl result : bool;
+				dcl path : seq of PointOfInterest;
+				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
+	      result2 := b.startDijkstra(); -- breaks pre-condition
+	      path := b.makePath();
+			);
+			
+		public FailingTestFindCoffeeNearby : () ==> ()
+			FailingTestFindCoffeeNearby() == (
+				dcl b: Building := new Building(5,5,2);
+				dcl result : bool;
+				dcl path : seq of PointOfInterest;
+				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
+	      result := b.addOrigin(1,0,0);
+	      result := b.addDestination(3,0,0);
+	      result2 := b.startDijkstra();
+	     	
+	     	path := b.getPathToClosestType(<Coffee>); -- breaks pre-condition
+	      assertEqual(len(path),4);
+			);
+			
 	  public static main: () ==> ()
 	  		main() ==
 	  		(
