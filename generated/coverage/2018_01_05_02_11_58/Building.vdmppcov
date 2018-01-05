@@ -443,6 +443,6 @@ operations
 				);
 				return [];
 			)
-			pre dist <> {|->} and hasOrigin(points) and exists p in set points & (p.description = type);
+			pre dist <> {|->} and hasDestination(points) and exists p in set points & (p.description = type);
 				
 end Building
