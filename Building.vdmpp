@@ -197,7 +197,7 @@ operations
 			) else (
 				return pathToDest;
 			);
-		) pre dist <> {|->} and pred <> {|->} and hasOrigin(points) and hasDestination(points) and hasDestination(points) and hasOrigin(points);
+		) pre dist <> {|->} and pred <> {|->} and hasOrigin(points) and hasDestination(points);
 
 	--Dijkstra Algorithm
 	--public dijkstra: PointOfInterest ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
