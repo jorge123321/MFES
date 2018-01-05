@@ -1,0 +1,112 @@
+class TestBuilding is subclass of MyTestCase
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+-- TODO Define instance variables here
+operations
+		protected assertFalse : bool ==> ()
+			assertFalse(a) == return
+				pre a = false;
+					
+		public TestCreateBuilding : () ==> ()
+	 		TestCreateBuilding() == ( 
+	       	dcl b : Building := new Building(5,5,2);
+	       	assertFalse(b.hasOrigin(b.points));
+	       	assertFalse(b.hasDestination(b.points));
+	  );
+	  
+	  public TestAddOrigin : () ==> ()
+			TestAddOrigin() == (
+					dcl b : Building := new Building(5,5,2);
+					dcl result : bool;
+		     	assertFalse(b.hasOrigin(b.points));
+	       	result := b.addOrigin(1,0,0);
+	       	assertTrue(b.hasOrigin(b.points));
+			);	  
+			
+		public TestAddDestination : () ==> ()
+			TestAddDestination() == (
+					dcl b : Building := new Building(5,5,2);
+					dcl result : bool;
+		     	assertFalse(b.hasDestination(b.points));
+	       	result := b.addDestination(1,0,0);
+	       	assertTrue(b.hasDestination(b.points));
+			);	 
+			
+		public TestAddType : () ==> ()
+			TestAddType() == (
+					dcl b : Building := new Building(5,5,2);
+					dcl result : bool;
+		     	for all p1 in set b.points do (
+		     		if(p1.GetX() = 1 and p1.GetY() = 1 and p1.GetZ() = 1) then (
+		     			assertEqual(p1.GetDesc(), <Null>);
+			       	result := b.addType(p1.GetX(),p1.GetY(),p1.GetZ(),<Coffee>);
+			       	assertEqual(p1.GetDesc(), <Coffee>);
+		     		);
+		     	);
+			);	 
+			
+		public TestMakePath : () ==> ()
+			TestMakePath() == (
+				dcl b: Building := new Building(5,5,2);
+				dcl result : bool;
+				dcl path : seq of PointOfInterest;
+				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
+	      result := b.addOrigin(1,0,0);
+	      result := b.addDestination(3,0,0);
+	      result2 := b.startDijkstra();
+	      path := b.makePath();
+	      assertEqual(len(path),3);
+			);
+			
+		public TestFindCoffeeNearby : () ==> ()
+			TestFindCoffeeNearby() == (
+				dcl b: Building := new Building(5,5,2);
+				dcl result : bool;
+				dcl path : seq of PointOfInterest;
+				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
+	      result := b.addOrigin(1,0,0);
+	      result2 := b.startDijkstra();
+	      
+	      for all p1 in set b.points do (
+	     		if(p1.GetX() = 2 and p1.GetY() = 2 and p1.GetZ() = 0) then (
+	     			assertEqual(p1.GetDesc(), <Null>);
+		       	result := b.addType(p1.GetX(),p1.GetY(),p1.GetZ(),<Coffee>);
+		       	assertEqual(p1.GetDesc(), <Coffee>);
+	     		);
+	     	);
+	     	
+	     	path := b.getPathToClosestType(<Coffee>);
+	      assertEqual(len(path),4);
+	      
+			);
+			
+		private getPointFromCoords : nat * nat * nat ==> PointOfInterest | ()
+			getPointFromCoords(x,y,z) == (
+					dcl b : Building := new Building(5,5,2);
+					dcl point : PointOfInterest;
+					for all p1 in set b.points do (
+						if(p1.GetX() = x and p1.GetY() = y and p1.GetZ() = z) then (
+							return p1;
+						);
+					);
+					return point;
+			);
+			
+	  public static main: () ==> ()
+	  		main() ==
+	  		(
+	  			--new TestBuilding().TestCreateBuilding();
+	  			--new TestBuilding().TestAddOrigin();
+	  			--new TestBuilding().TestAddDestination();
+	  			--new TestBuilding().TestAddType();
+	  			--new TestBuilding().TestMakePath();
+	  			new TestBuilding().TestFindCoffeeNearby();
+	  		);
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end TestBuilding

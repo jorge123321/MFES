@@ -1,0 +1,448 @@
+class Building
+types
+	 public Points = set of PointOfInterest;	 
+	 public Edge = set of PointOfInterest
+  	inv e == card(e)=2;  	
+   public Weight = int;
+	 public Graph :: e : Edge
+	 									w : Weight;
+
+values
+	public min_lines : int = 3;
+	public min_columns : int = 3;
+	public min_floors : int = 1;
+
+instance variables
+	public points : Points := {};
+	public origin : PointOfInterest;
+	public destination : PointOfInterest;
+	public s : PointOfInterest;
+	public C: Points := {};
+ 	public Q: Points := {};
+ 	public dist: map PointOfInterest to nat := {|->};
+ 	public pred: map PointOfInterest to PointOfInterest := {|->};
+ 	public edges : set of Points := {};
+ 	public weights : set of nat := {1};
+ 	public graph : set of Graph := {};
+	public max_lines: int;
+	public max_columns : int;
+	public max_floors : int;
+
+functions
+	-- CHECK if we're only moving 1 position at a time, ie one move on the x left or right, one move on y up or down and one move on z up or down
+	public moveIsValid : nat * nat * nat -> bool
+			moveIsValid(deltaX, deltaY, deltaZ) == (
+				(deltaX = 0 and deltaY = 0 and deltaZ = 1) or
+				(deltaX = 0 and deltaY = 0 and deltaZ = -1) or
+				(deltaX = 1 and deltaY = 0 and deltaZ = 0) or
+				(deltaX = -1 and deltaY = 0 and deltaZ = 0) or
+				(deltaX = 0 and deltaY = 1 and deltaZ = 0) or
+				(deltaX = 0 and deltaY = -1 and deltaZ = 0)
+			);
+				
+	-- CHECK If result is the Shortest Path	
+	public IsShortestPath: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
+	 IsShortestPath(dist, pred, C, s, graph,points) == 
+	 	DefinesShortestDist(dist, pred, C, s, graph) and	SetOfLinkedVertices(C,s,graph, points);	 
+		
+	public DefinesShortestDist: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph -> bool
+ 	DefinesShortestDist(dist, pred, C, s, graph) == 
+ 	(dist(s)=0 and 
+ 		forall u in set C\{s} & (exists v in set C & (
+ 			pred(u)=v and neighbour(graph, u, v) and
+ 			let tup in set graph be st tup.e={u,v} in (dist(u)=dist(v)+tup.w)))
+ 		and
+ 		forall u1, v in set C & (neighbour(graph, u1, v) =>
+ 				let tup in set graph be st tup.e={u1,v} in (dist(u1)<=dist(v)+tup.w))
+ );
+ 
+ public SetOfLinkedVertices: set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
+ 	SetOfLinkedVertices(C,s,graph,points) ==
+ 	(forall u in set C & (forall v in set points & neighbour(graph, u, v) => v in set C) and
+ 		forall u1 in set C\{s} & (exists v in set C & neighbour(graph, u1, v))
+ 	);
+ 	
+ 	public neighbour: set of Graph * PointOfInterest * PointOfInterest	-> bool
+		neighbour(wg, i, j) ==
+ 		exists tup in set wg & (tup.e={i,j} and tup.w>0 and j.description <> <Wall>);
+ 					
+		-- CHECK if building has origin defined
+		public hasOrigin : Points -> bool
+			hasOrigin(points) == (
+				exists p in set points & p.description = <Origin>
+			);
+			
+			-- CHECK if building has destination defined
+		public hasDestination : Points -> bool
+			hasDestination(points) == (
+				exists p in set points & p.description = <Destination>
+			);
+
+		
+		--CHECK if x,y,z is valid position (its on points)
+		public validPosition : nat * nat * nat * int * int * int-> bool
+		validPosition(x,y,z,max_lines,max_columns,max_floors) == (
+			(x >= 0 and x <= max_lines and y >= 0 and y <= max_columns and z >= 0 and z <= max_floors)
+			);
+operations
+	
+	public getPoints:() ==> Points
+		getPoints() == (
+			return points;
+		);
+		
+	--CREATE a building
+	public Building: int*int*int ==> Building
+	Building(x,y,z) == (
+			max_lines := x-1;
+	 		max_columns := y-1;
+	 		max_floors := z-1;
+			
+		for i = 0 to (x - 1) do
+		(
+			for j = 0 to (y - 1) do
+			(
+					for k = 0 to (z - 1) do 
+					(
+						dcl point: PointOfInterest := new PointOfInterest(i,j,k,<Null>);
+						addPoint(point);
+					)
+			)
+		);
+		return self;
+		);
+		
+		--public indoorFinder: () ==> seq of PointOfInterest
+		--	indoorFinder() == (
+		--		if(sameZ(origin, destination)) then 
+		--		(
+		--			dijkstra(origin);
+		--			return makePath();
+		--		)else
+		--		(
+		--			dcl pathToStair: seq of PointOfInterest := [];
+		--			dcl tempDest : PointOfInterest;
+		--			pathToStair := getPathToClosestType(<Stair>);
+		--			if(pathToStair <> {}) then(
+		--			for all p in set pathToStair do(
+		--				if(p.GetDesc() = <Destination>) then 
+		--				(
+		--					tempDest := p;
+		--				)
+		--			);					
+		--		return indoorFinderZ(pathToStair, tempDest);
+		--		) -- else printf('impossible')??
+		--		);				
+		--	);
+			
+		--public indoorFinderZ: seq of PointOfInterest ==> seq of PointOfInterest
+		--	indoorFinderZ(pointSeq, tempOrigin) == (
+		--		if(sameZ(tempOrigin, destination)) then 
+		--		(
+		--			dijkstra(tempOrigin);
+		--			pointSeq := pointSeq union makePath();
+		--			return pointSeq;
+		--		)else
+		--		(
+		--			dcl pathToStair: seq of PointOfInterest := [];
+		--			dcl tempDest : PointOfInterest;
+		--			pathToStair := getPathToClosestType(<Stair>);
+		--			if(pathToStair <> {}) then(
+		--			for all p in set pathToStair do(
+		--				if(p.GetDesc() = <Destination>) then 
+		--				(
+		--					tempDest := p;
+		--				)
+		--			);					
+		--		return indoorFinderZ(pathToStair, tempDest);
+		--		) -- else printf('impossible')??
+		--		);				
+		--	);
+			
+		
+	--CHECK if a point has the same coords as another point
+	public sameCoords: PointOfInterest * PointOfInterest ==> bool
+		sameCoords(p1, p2) == (
+			if(p1.GetX() = p2.GetX() and p1.GetY() = p2.GetY() and p1.GetZ() = p2.GetZ()) then (
+				return true;
+			) else (
+				return false;
+			)
+		) pre p1 in set points and p2 in set points;
+		
+	--MAKE path from origin to dest
+	public makePath: () ==> seq of PointOfInterest
+		makePath() == (
+			dcl pathToDest: seq of PointOfInterest := [];
+			dcl arrivedOrigin: bool := false;
+			dcl tempPoint: PointOfInterest :=  destination;
+			dcl count : int := 0;
+			dcl maxIterations : int := card(dom pred);
+			pathToDest := pathToDest ^ [tempPoint]; --add destination as starter
+			while(not arrivedOrigin and count < maxIterations) do (
+				for all p1 in set dom pred do (
+					if(sameCoords(tempPoint, p1)) then (
+						if(sameCoords(p1, origin)) then (
+								arrivedOrigin := true;
+						) else (
+							pathToDest := pathToDest ^ [pred(p1)]; --when we find the one that matches the tempPoint then we add the value that it maps to on the map to the set of path
+							tempPoint := pred(p1);	
+						)
+					)
+				);
+				count := count + 1;
+			);
+			if(count = maxIterations and not arrivedOrigin) then (
+				return [];
+			) else (
+				return pathToDest;
+			);
+		) pre dist <> {|->} and pred <> {|->} and hasOrigin(points) and hasDestination(points);
+
+	--Dijkstra Algorithm
+	--public dijkstra: PointOfInterest ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+		--dijkstra(s) == (
+		
+		public startDijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+			startDijkstra() == (					
+			for all p in set points do(
+				let tedges = {{p,e2}| e2 in set getNeighbours(p) & e2.GetDesc() <> <Wall>} in(
+				
+					edges := edges union tedges;
+				)
+			);
+			
+			let tedges = {e | e in set edges} in(
+				let tgraph = {mk_Graph(e,w) | e in set edges, w in set weights} in (
+					graph := tgraph;
+				)
+			);
+			
+			dist := {|->};
+			pred := {|->};
+			C := {};
+			Q := {};
+			
+			return dijkstra(graph);
+			
+			)
+						pre hasOrigin(points);
+	
+	public dijkstra: set of Graph ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+
+		dijkstra(wgraph) == (
+
+			s := origin;
+			Q := points;
+			C := C union {s};
+			dist := dist ++ {s|->0}; 
+			pred := dist ++ {s|->s}; 
+				
+			while(C inter Q <> {}) do (
+				let u in set C inter Q be st (forall u1 in set C inter Q & dist(u)<=dist(u1)) in (
+					Q := Q\{u};
+				
+					for all v in set Q do(
+						if(v.GetDesc() <> <Wall>) then (
+							if(u in set getNeighbours(v)) then(
+								let uv in set wgraph be st uv.e={u,v} in(
+									if uv.w > 0 then (
+										let length=dist(u)+uv.w in(
+											if v in set C then(
+												if length < dist(v) then(
+													dist := dist ++ {v|->length};
+													pred := pred ++ {v|-> u};
+												)
+											)
+											else (
+												dist := dist ++ {v|->length};
+												pred := pred ++ {v|->u};
+												C := C union {v};
+											)
+										)
+									)
+								)
+							)
+						)
+					);				
+				)
+			);
+			return mk_(C,dist,pred);
+	)
+	pre dist = {|->} and	pred = {|->} and C={} and Q={}
+	post IsShortestPath(dist, pred, C, s, graph,points);
+			
+	-- ADD a point to the building
+	public addPoint: PointOfInterest ==> ()
+		addPoint(P) == (
+				points := points union {P};
+			return;
+		)
+		pre P not in set points
+		post P in set points;
+			
+	-- ADD an origin point to the building
+	public addOrigin: nat * nat * nat ==> bool
+		addOrigin(x,y,z) == (
+			for all p in set points do (
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
+				then (
+					p.changePoint(x,y, z, <Origin>);
+					origin := p;
+					return true;
+				)
+			);
+			return false;
+		)
+		pre  not hasOrigin(points) and validPosition(x,y,z, max_lines,max_columns,max_floors)
+		post hasOrigin(points);
+		
+	-- ADD a destination point to the building 
+	public addDestination: nat * nat * nat ==> bool
+		addDestination(x,y,z) == (
+			for all p in set points do (
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
+				then (
+					p.changePoint(x,y, z, <Destination>);
+					destination := p;
+					return true;
+				)
+			);
+			return false;
+		)
+		pre  not hasDestination(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
+		post hasDestination(points);
+		
+	-- ADD a type to a point in the building
+		public addType: nat * nat * nat * PointOfInterest`Type==> bool
+		addType(x,y,z,type) == (
+			for all p in set points do (
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
+				then (
+					p.changePoint(x,y,z, type);
+					return true;
+				)
+			);
+			return false;
+		) pre validPosition(x,y,z,max_lines,max_columns,max_floors);
+		
+	-- CHANGE Origin point to the building
+	public changeOrigin: nat * nat * nat ==> bool
+		changeOrigin(x,y,z) == (
+			for all p in set points do (
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
+				then (
+					resetOrigin();
+					p.changePoint(x,y, z, <Origin>);
+					origin := p;
+					return true;
+				)
+			);
+			return false;
+		)
+		pre  hasOrigin(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
+		post hasOrigin(points);
+		
+	-- CHANGE Destination point to the building
+	public changeDestination: nat * nat * nat ==> bool
+		changeDestination(x,y,z) == (
+			for all p in set points do (
+				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
+				then (
+					resetDestination();
+					p.changePoint(x,y, z, <Origin>);
+					origin := p;
+					return true;
+				)
+			);
+			return false;
+		)
+		pre  hasDestination(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
+		post hasDestination(points);
+				
+	-- CHANGE X Y Z and Description of point of interest 
+	public changePoint: PointOfInterest*nat*nat*nat*PointOfInterest`Type ==> ()
+		changePoint(p,newx, newy, newz, newdesc) == (
+			p.changePoint(newx, newy, newz, newdesc);
+			return;
+		)
+		pre p in set points;
+		
+		--RESET Origin
+		public resetOrigin: () ==> bool
+			resetOrigin() == (
+				for all p in set points do(
+					if (p.GetDesc() = <Origin>)
+					then (
+						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
+						return true;
+					)
+				);
+				return false;
+			)
+			pre hasOrigin(points)
+			post not hasOrigin(points);
+			
+		--RESET Destination
+		public resetDestination: () ==> bool
+			resetDestination() == (
+				for all p in set points do(
+					if (p.GetDesc() = <Destination>)
+					then (
+						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
+						return true;
+					)
+				);
+				return false;
+			)
+			pre hasDestination(points)
+			post not hasDestination(points);
+
+	
+	-- GET all positions next to a Point
+	public getNeighbours : PointOfInterest ==> set of PointOfInterest
+		getNeighbours(point) == (
+			dcl neighboursSet : set of PointOfInterest := {};
+			for all p1 in set points do (
+					if(p1.GetX() = (point.GetX() - 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then
+					(
+						neighboursSet := neighboursSet union {p1};
+					) else if (p1.GetX() = (point.GetX() + 1) and p1.GetY() = point.GetY() and p1.GetZ() = point.GetZ()) then 
+					(
+						neighboursSet := neighboursSet union {p1};
+					) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() - 1) and p1.GetZ() = point.GetZ()) then 
+					(
+						neighboursSet := neighboursSet union {p1};
+					) else if (p1.GetX() = point.GetX() and p1.GetY() = (point.GetY() + 1) and p1.GetZ() = point.GetZ()) then 
+					(
+						neighboursSet := neighboursSet union {p1};
+					);
+					if(point.GetDesc() = <Stair> or point.GetDesc() = <Elevator>) then(
+						if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()+1)) then 
+						(
+							neighboursSet := neighboursSet union {p1};
+						) else if (p1.GetX() = point.GetX() and p1.GetY() = point.GetY() and p1.GetZ() = (point.GetZ()-1)) then 
+						(
+							neighboursSet := neighboursSet union {p1};
+						);
+					)
+			);
+			return neighboursSet;
+		)
+		pre points <> {};
+				
+		
+		--GET closer type
+		public getPathToClosestType : PointOfInterest`Type ==> seq of PointOfInterest
+			getPathToClosestType(type) == (
+				for all p1 in set dom dist do (
+					if(p1.GetDesc() = type) then (
+						destination := p1;
+						return makePath();
+					)
+				);
+				return [];
+			)
+			pre dist <> {|->} and hasOrigin(points) and exists p in set points & (p.description = type);
+				
+end Building
