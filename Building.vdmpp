@@ -9,11 +9,8 @@ types
 
 values
 	public min_lines : int = 3;
-	public max_lines : int = 5;
 	public min_columns : int = 3;
-	public max_columns : int = 5;
 	public min_floors : int = 1;
-	public max_floors : int = 2;
 
 instance variables
 	public points : Points := {};
@@ -27,7 +24,9 @@ instance variables
  	public edges : set of Points := {};
  	public weights : set of nat := {1};
  	public graph : set of Graph := {};
-
+	public max_lines: int;
+	public max_columns : int;
+	public max_floors : int;
 
 functions
 	-- CHECK if we're only moving 1 position at a time, ie one move on the x left or right, one move on y up or down and one move on z up or down
@@ -40,7 +39,7 @@ functions
 				(deltaX = 0 and deltaY = 1 and deltaZ = 0) or
 				(deltaX = 0 and deltaY = -1 and deltaZ = 0)
 			);
-	
+				
 	-- CHECK If result is the Shortest Path	
 	public IsShortestPath: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
 	 IsShortestPath(dist, pred, C, s, graph,points) == 
@@ -81,9 +80,9 @@ functions
 
 		
 		--CHECK if x,y,z is valid position (its on points)
-		public validPosition : nat * nat * nat -> bool
-		validPosition(x,y,z) == (
-			(x >= 0 and x <= max_lines and y >= min_columns and y <= max_columns and z >= min_floors and z <= max_floors)
+		public validPosition : nat * nat * nat * int * int * int-> bool
+		validPosition(x,y,z,max_lines,max_columns,max_floors) == (
+			(x >= 0 and x <= max_lines and y >= 0 and y <= max_columns and z >= 0 and z <= max_floors)
 			);
 operations
 	
@@ -93,20 +92,24 @@ operations
 		);
 		
 	--CREATE a building
-	public Building:() ==> Building
-	Building() == (		
-		for i = 0 to (max_lines - 1) do
+	public Building: int*int*int ==> Building
+	Building(x,y,z) == (
+			max_lines := x-1;
+	 		max_columns := y-1;
+	 		max_floors := z-1;
+			
+		for i = 0 to (x - 1) do
 		(
-			for j = 0 to (max_columns - 1) do
+			for j = 0 to (y - 1) do
 			(
-					for k = 0 to (max_floors - 1) do 
+					for k = 0 to (z - 1) do 
 					(
 						dcl point: PointOfInterest := new PointOfInterest(i,j,k,<Null>);
 						addPoint(point);
 					)
 			)
 		);
-		
+		return self;
 		);
 		
 		--public indoorFinder: () ==> seq of PointOfInterest
@@ -165,7 +168,7 @@ operations
 			) else (
 				return false;
 			)
-		);
+		) pre p1 in set points and p2 in set points;
 		
 	--MAKE path from origin to dest
 	public makePath: () ==> seq of PointOfInterest
@@ -194,15 +197,14 @@ operations
 			) else (
 				return pathToDest;
 			);
-		);
+		) pre dist <> {|->} and pred <> {|->} and hasOrigin(points) and hasDestination(points) and hasDestination(points) and hasOrigin(points);
 
 	--Dijkstra Algorithm
 	--public dijkstra: PointOfInterest ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
 		--dijkstra(s) == (
-	public dijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
-
-		dijkstra() == (
 		
+		public startDijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+			startDijkstra() == (					
 			for all p in set points do(
 				let tedges = {{p,e2}| e2 in set getNeighbours(p) & e2.GetDesc() <> <Wall>} in(
 				
@@ -218,6 +220,18 @@ operations
 			
 			dist := {|->};
 			pred := {|->};
+			C := {};
+			Q := {};
+			
+			return dijkstra(graph);
+			
+			)
+			pre hasOrigin(points);
+	
+	public dijkstra: set of Graph ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
+
+		dijkstra(wgraph) == (
+
 			s := origin;
 			Q := points;
 			C := C union {s};
@@ -231,7 +245,7 @@ operations
 					for all v in set Q do(
 						if(v.GetDesc() <> <Wall>) then (
 							if(u in set getNeighbours(v)) then(
-								let uv in set graph be st uv.e={u,v} in(
+								let uv in set wgraph be st uv.e={u,v} in(
 									if uv.w > 0 then (
 										let length=dist(u)+uv.w in(
 											if v in set C then(
@@ -255,7 +269,7 @@ operations
 			);
 			return mk_(C,dist,pred);
 	)
-	pre hasOrigin(points) and hasDestination(points)
+	pre dist = {|->} and	pred = {|->} and C={} and Q={}
 	post IsShortestPath(dist, pred, C, s, graph,points);
 			
 	-- ADD a point to the building
@@ -280,7 +294,7 @@ operations
 			);
 			return false;
 		)
-		pre  not hasOrigin(points) and validPosition(x,y,z)
+		pre  not hasOrigin(points) and validPosition(x,y,z, max_lines,max_columns,max_floors)
 		post hasOrigin(points);
 		
 	-- ADD a destination point to the building 
@@ -296,7 +310,7 @@ operations
 			);
 			return false;
 		)
-		pre  not hasDestination(points) and validPosition(x,y,z)
+		pre  not hasDestination(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
 		post hasDestination(points);
 		
 	-- ADD a type to a point in the building
@@ -310,7 +324,7 @@ operations
 				)
 			);
 			return false;
-		) pre validPosition(x,y,z);
+		) pre validPosition(x,y,z,max_lines,max_columns,max_floors);
 		
 	-- CHANGE Origin point to the building
 	public changeOrigin: nat * nat * nat ==> bool
@@ -326,7 +340,7 @@ operations
 			);
 			return false;
 		)
-		pre  hasOrigin(points) and validPosition(x,y,z)
+		pre  hasOrigin(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
 		post hasOrigin(points);
 		
 	-- CHANGE Destination point to the building
@@ -343,7 +357,7 @@ operations
 			);
 			return false;
 		)
-		pre  hasDestination(points) and validPosition(x,y,z)
+		pre  hasDestination(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
 		post hasDestination(points);
 				
 	-- CHANGE X Y Z and Description of point of interest 
@@ -429,6 +443,6 @@ operations
 				);
 				return [];
 			)
-			pre dist <> {|->};
-	
+			pre dist <> {|->} and hasDestination(points);
+				
 end Building
