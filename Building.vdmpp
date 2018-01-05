@@ -226,7 +226,7 @@ operations
 			return dijkstra(graph);
 			
 			)
-			pre hasOrigin(points);
+						pre hasOrigin(points);
 	
 	public dijkstra: set of Graph ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
 
@@ -443,6 +443,6 @@ operations
 				);
 				return [];
 			)
-			pre dist <> {|->} and hasDestination(points);
+			pre dist <> {|->} and hasDestination(points) and exists p in set points & (p.description = type);
 				
 end Building
