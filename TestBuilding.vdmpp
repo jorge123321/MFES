@@ -46,7 +46,8 @@ operations
 		     	);
 			);	 
 		
-		-- tests finding a path between an origin (1,0,0) and a destination (3,0,0) and if it's length is actually the shortest
+		-- tests finding a path between an origin (1,0,0) and a destination (3,0,0) with a wall between
+		-- and test changeOrigin and changeDestination
 		public TestMakePath : () ==> ()
 			TestMakePath() == (
 				dcl b: Building := new Building(5,5,2);
@@ -55,8 +56,14 @@ operations
 				dcl result2 : (Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest);
 	      result := b.addOrigin(1,0,0);
 	      result := b.addDestination(3,0,0);
+	      result := b.addType(2,0,0,<Wall>);
 	      result2 := b.startDijkstra();
 	      path := b.makePath();
+	      assertEqual(len(path),5);
+	      result:= b.changeOrigin(4,4,0);
+	      result:= b.changeDestination(3,3,0);
+	      result2:= b.startDijkstra();
+	      path:= b.makePath();
 	      assertEqual(len(path),3);
 			);
 		
