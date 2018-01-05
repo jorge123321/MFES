@@ -1133,6 +1133,8 @@ public class Building {
     }
   }
   public static void main(String[] args) {
+	  //teste 1 
+	  System.out.println("Teste 1:\n");
 	  Building b = new Building(5,5,2);
 	  
 	  b.addOrigin(4, 4, 0);
@@ -1141,6 +1143,17 @@ public class Building {
 	  
 	  b.startDijkstra();
 	  System.out.println(b.makePath());
+	  
+	  //teste 2 
+	  System.out.println("Teste 2:\n");
+	  Building b1 = new Building(5,5,2);
+	  
+	  b1.addOrigin(0, 0, 0);
+	  b1.addType(0, 4, 0, WcQuote.getInstance());
+	  b1.addType(0, 3, 0, WallQuote.getInstance());
+	  
+	  b1.startDijkstra();
+	  System.out.println(b.getPathToClosestType(WcQuote.getInstance()));
 	  
   }
 }

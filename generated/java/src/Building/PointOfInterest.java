@@ -6,7 +6,7 @@ import org.overture.codegen.runtime.*;
 @SuppressWarnings("all")
 public class PointOfInterest {
   public Position position;
-  public Object description = Building.quotes.NullQuote.getInstance();
+  public Object description = NullQuote.getInstance();
 
   public void cg_init_PointOfInterest_1(
       final Number x, final Number y, final Number z, final Object desc) {
