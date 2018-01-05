@@ -1,7 +1,7 @@
 package Building;
 
+import Building.quotes.*;
 import java.util.*;
-import  Building.quotes.*;
 import org.overture.codegen.runtime.*;
 
 @SuppressWarnings("all")
@@ -152,7 +152,7 @@ public class Building {
       VDMSet set_3 = getNeighbours(p);
       for (Iterator iterator_3 = set_3.iterator(); iterator_3.hasNext(); ) {
         PointOfInterest e2 = ((PointOfInterest) iterator_3.next());
-        if (!(Utils.equals(e2.GetDesc(),  WallQuote.getInstance()))) {
+        if (!(Utils.equals(e2.GetDesc(), WallQuote.getInstance()))) {
           setCompResult_1.add(SetUtil.set(p, e2));
         }
       }
@@ -236,7 +236,7 @@ public class Building {
           Q = SetUtil.diff(Utils.copy(Q), SetUtil.set(u));
           for (Iterator iterator_24 = Q.iterator(); iterator_24.hasNext(); ) {
             PointOfInterest v = (PointOfInterest) iterator_24.next();
-            if (!(Utils.equals(v.GetDesc(),  WallQuote.getInstance()))) {
+            if (!(Utils.equals(v.GetDesc(), WallQuote.getInstance()))) {
               if (SetUtil.inSet(u, getNeighbours(v))) {
                 {
                   Graph uv = null;
@@ -317,7 +317,7 @@ public class Building {
       }
 
       if (andResult_13) {
-        p.changePoint(x, y, z,  OriginQuote.getInstance());
+        p.changePoint(x, y, z, OriginQuote.getInstance());
         origin = p;
         return true;
       }
@@ -346,7 +346,7 @@ public class Building {
       }
 
       if (andResult_16) {
-        p.changePoint(x, y, z,  DestinationQuote.getInstance());
+        p.changePoint(x, y, z, DestinationQuote.getInstance());
         destination = p;
         return true;
       }
@@ -384,6 +384,7 @@ public class Building {
 
   public Boolean changeOrigin(final Number x, final Number y, final Number z) {
 
+    Boolean result = false;
     for (Iterator iterator_28 = points.iterator(); iterator_28.hasNext(); ) {
       PointOfInterest p = (PointOfInterest) iterator_28.next();
       Boolean andResult_21 = false;
@@ -403,124 +404,87 @@ public class Building {
       }
 
       if (andResult_21) {
-        return resetOrigin();
+        p.changePoint(x, y, z, OriginQuote.getInstance());
+        origin = p;
+        result = true;
       }
     }
-    return false;
+    if (result) {
+      for (Iterator iterator_29 = points.iterator(); iterator_29.hasNext(); ) {
+        PointOfInterest p = (PointOfInterest) iterator_29.next();
+        Boolean andResult_23 = false;
+
+        if (Utils.equals(p.GetDesc(), OriginQuote.getInstance())) {
+          Boolean andResult_24 = false;
+
+          if (!(Utils.equals(p.GetX(), x))) {
+            Boolean andResult_25 = false;
+
+            if (!(Utils.equals(p.GetY(), y))) {
+              if (!(Utils.equals(p.GetZ(), z))) {
+                andResult_25 = true;
+              }
+            }
+
+            if (andResult_25) {
+              andResult_24 = true;
+            }
+          }
+
+          if (andResult_24) {
+            andResult_23 = true;
+          }
+        }
+
+        if (andResult_23) {
+          p.changePoint(x, y, z, NullQuote.getInstance());
+        }
+      }
+    }
+
+    return result;
   }
 
   public Boolean changeDestination(final Number x, final Number y, final Number z) {
 
-    for (Iterator iterator_29 = points.iterator(); iterator_29.hasNext(); ) {
-      PointOfInterest p = (PointOfInterest) iterator_29.next();
-      Boolean andResult_24 = false;
+    Boolean result = false;
+    for (Iterator iterator_30 = points.iterator(); iterator_30.hasNext(); ) {
+      PointOfInterest p = (PointOfInterest) iterator_30.next();
+      Boolean andResult_27 = false;
 
       if (Utils.equals(p.GetX(), x)) {
-        Boolean andResult_25 = false;
+        Boolean andResult_28 = false;
 
         if (Utils.equals(p.GetY(), y)) {
           if (Utils.equals(p.GetZ(), z)) {
-            andResult_25 = true;
-          }
-        }
-
-        if (andResult_25) {
-          andResult_24 = true;
-        }
-      }
-
-      if (andResult_24) {
-        return resetDestination();
-      }
-    }
-    return false;
-  }
-
-  public void changePoint(
-      final PointOfInterest p,
-      final Number newx,
-      final Number newy,
-      final Number newz,
-      final Object newdesc) {
-
-    p.changePoint(newx, newy, newz, newdesc);
-    return;
-  }
-
-  public Boolean resetOrigin() {
-
-    for (Iterator iterator_30 = points.iterator(); iterator_30.hasNext(); ) {
-      PointOfInterest p = (PointOfInterest) iterator_30.next();
-      if (Utils.equals(p.GetDesc(),  OriginQuote.getInstance())) {
-        return addType(p.GetX(), p.GetY(), p.GetZ(),  NullQuote.getInstance());
-      }
-    }
-    return false;
-  }
-
-  public Boolean resetDestination() {
-
-    for (Iterator iterator_31 = points.iterator(); iterator_31.hasNext(); ) {
-      PointOfInterest p = (PointOfInterest) iterator_31.next();
-      if (Utils.equals(p.GetDesc(),  DestinationQuote.getInstance())) {
-        return addType(p.GetX(), p.GetY(), p.GetZ(),  NullQuote.getInstance());
-      }
-    }
-    return false;
-  }
-
-  public VDMSet getNeighbours(final PointOfInterest point) {
-
-    VDMSet neighboursSet = SetUtil.set();
-    for (Iterator iterator_32 = points.iterator(); iterator_32.hasNext(); ) {
-      PointOfInterest p1 = (PointOfInterest) iterator_32.next();
-      Boolean andResult_26 = false;
-
-      if (Utils.equals(p1.GetX(), point.GetX().longValue() - 1L)) {
-        Boolean andResult_27 = false;
-
-        if (Utils.equals(p1.GetY(), point.GetY())) {
-          if (Utils.equals(p1.GetZ(), point.GetZ())) {
-            andResult_27 = true;
-          }
-        }
-
-        if (andResult_27) {
-          andResult_26 = true;
-        }
-      }
-
-      if (andResult_26) {
-        neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
-
-      } else {
-        Boolean andResult_28 = false;
-
-        if (Utils.equals(p1.GetX(), point.GetX().longValue() + 1L)) {
-          Boolean andResult_29 = false;
-
-          if (Utils.equals(p1.GetY(), point.GetY())) {
-            if (Utils.equals(p1.GetZ(), point.GetZ())) {
-              andResult_29 = true;
-            }
-          }
-
-          if (andResult_29) {
             andResult_28 = true;
           }
         }
 
         if (andResult_28) {
-          neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
+          andResult_27 = true;
+        }
+      }
 
-        } else {
+      if (andResult_27) {
+        p.changePoint(x, y, z, DestinationQuote.getInstance());
+        destination = p;
+        result = true;
+      }
+    }
+    if (result) {
+      for (Iterator iterator_31 = points.iterator(); iterator_31.hasNext(); ) {
+        PointOfInterest p = (PointOfInterest) iterator_31.next();
+        Boolean andResult_29 = false;
+
+        if (Utils.equals(p.GetDesc(), DestinationQuote.getInstance())) {
           Boolean andResult_30 = false;
 
-          if (Utils.equals(p1.GetX(), point.GetX())) {
+          if (!(Utils.equals(p.GetX(), x))) {
             Boolean andResult_31 = false;
 
-            if (Utils.equals(p1.GetY(), point.GetY().longValue() - 1L)) {
-              if (Utils.equals(p1.GetZ(), point.GetZ())) {
+            if (!(Utils.equals(p.GetY(), y))) {
+              if (!(Utils.equals(p.GetZ(), z))) {
                 andResult_31 = true;
               }
             }
@@ -531,48 +495,51 @@ public class Building {
           }
 
           if (andResult_30) {
-            neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
-
-          } else {
-            Boolean andResult_32 = false;
-
-            if (Utils.equals(p1.GetX(), point.GetX())) {
-              Boolean andResult_33 = false;
-
-              if (Utils.equals(p1.GetY(), point.GetY().longValue() + 1L)) {
-                if (Utils.equals(p1.GetZ(), point.GetZ())) {
-                  andResult_33 = true;
-                }
-              }
-
-              if (andResult_33) {
-                andResult_32 = true;
-              }
-            }
-
-            if (andResult_32) {
-              neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
-            }
+            andResult_29 = true;
           }
+        }
+
+        if (andResult_29) {
+          p.changePoint(x, y, z, NullQuote.getInstance());
+        }
+      }
+    }
+
+    return result;
+  }
+
+  public VDMSet getNeighbours(final PointOfInterest point) {
+
+    VDMSet neighboursSet = SetUtil.set();
+    for (Iterator iterator_32 = points.iterator(); iterator_32.hasNext(); ) {
+      PointOfInterest p1 = (PointOfInterest) iterator_32.next();
+      Boolean andResult_32 = false;
+
+      if (Utils.equals(p1.GetX(), point.GetX().longValue() - 1L)) {
+        Boolean andResult_33 = false;
+
+        if (Utils.equals(p1.GetY(), point.GetY())) {
+          if (Utils.equals(p1.GetZ(), point.GetZ())) {
+            andResult_33 = true;
+          }
+        }
+
+        if (andResult_33) {
+          andResult_32 = true;
         }
       }
 
-      Boolean orResult_1 = false;
+      if (andResult_32) {
+        neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
 
-      if (Utils.equals(point.GetDesc(),  StairQuote.getInstance())) {
-        orResult_1 = true;
       } else {
-        orResult_1 = Utils.equals(point.GetDesc(),  ElevatorQuote.getInstance());
-      }
-
-      if (orResult_1) {
         Boolean andResult_34 = false;
 
-        if (Utils.equals(p1.GetX(), point.GetX())) {
+        if (Utils.equals(p1.GetX(), point.GetX().longValue() + 1L)) {
           Boolean andResult_35 = false;
 
           if (Utils.equals(p1.GetY(), point.GetY())) {
-            if (Utils.equals(p1.GetZ(), point.GetZ().longValue() + 1L)) {
+            if (Utils.equals(p1.GetZ(), point.GetZ())) {
               andResult_35 = true;
             }
           }
@@ -591,8 +558,8 @@ public class Building {
           if (Utils.equals(p1.GetX(), point.GetX())) {
             Boolean andResult_37 = false;
 
-            if (Utils.equals(p1.GetY(), point.GetY())) {
-              if (Utils.equals(p1.GetZ(), point.GetZ().longValue() - 1L)) {
+            if (Utils.equals(p1.GetY(), point.GetY().longValue() - 1L)) {
+              if (Utils.equals(p1.GetZ(), point.GetZ())) {
                 andResult_37 = true;
               }
             }
@@ -603,6 +570,78 @@ public class Building {
           }
 
           if (andResult_36) {
+            neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
+
+          } else {
+            Boolean andResult_38 = false;
+
+            if (Utils.equals(p1.GetX(), point.GetX())) {
+              Boolean andResult_39 = false;
+
+              if (Utils.equals(p1.GetY(), point.GetY().longValue() + 1L)) {
+                if (Utils.equals(p1.GetZ(), point.GetZ())) {
+                  andResult_39 = true;
+                }
+              }
+
+              if (andResult_39) {
+                andResult_38 = true;
+              }
+            }
+
+            if (andResult_38) {
+              neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
+            }
+          }
+        }
+      }
+
+      Boolean orResult_1 = false;
+
+      if (Utils.equals(point.GetDesc(), StairQuote.getInstance())) {
+        orResult_1 = true;
+      } else {
+        orResult_1 = Utils.equals(point.GetDesc(), ElevatorQuote.getInstance());
+      }
+
+      if (orResult_1) {
+        Boolean andResult_40 = false;
+
+        if (Utils.equals(p1.GetX(), point.GetX())) {
+          Boolean andResult_41 = false;
+
+          if (Utils.equals(p1.GetY(), point.GetY())) {
+            if (Utils.equals(p1.GetZ(), point.GetZ().longValue() + 1L)) {
+              andResult_41 = true;
+            }
+          }
+
+          if (andResult_41) {
+            andResult_40 = true;
+          }
+        }
+
+        if (andResult_40) {
+          neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
+
+        } else {
+          Boolean andResult_42 = false;
+
+          if (Utils.equals(p1.GetX(), point.GetX())) {
+            Boolean andResult_43 = false;
+
+            if (Utils.equals(p1.GetY(), point.GetY())) {
+              if (Utils.equals(p1.GetZ(), point.GetZ().longValue() - 1L)) {
+                andResult_43 = true;
+              }
+            }
+
+            if (andResult_43) {
+              andResult_42 = true;
+            }
+          }
+
+          if (andResult_42) {
             neighboursSet = SetUtil.union(Utils.copy(neighboursSet), SetUtil.set(p1));
           }
         }
@@ -625,147 +664,6 @@ public class Building {
 
   public Building() {}
 
-  public static Boolean moveIsValid(final Number deltaX, final Number deltaY, final Number deltaZ) {
-
-    Boolean orResult_2 = false;
-
-    Boolean andResult_40 = false;
-
-    if (Utils.equals(deltaX, 0L)) {
-      Boolean andResult_41 = false;
-
-      if (Utils.equals(deltaY, 0L)) {
-        if (Utils.equals(deltaZ, 1L)) {
-          andResult_41 = true;
-        }
-      }
-
-      if (andResult_41) {
-        andResult_40 = true;
-      }
-    }
-
-    if (andResult_40) {
-      orResult_2 = true;
-    } else {
-      Boolean orResult_3 = false;
-
-      Boolean andResult_42 = false;
-
-      if (Utils.equals(deltaX, 0L)) {
-        Boolean andResult_43 = false;
-
-        if (Utils.equals(deltaY, 0L)) {
-          if (Utils.equals(deltaZ, -1L)) {
-            andResult_43 = true;
-          }
-        }
-
-        if (andResult_43) {
-          andResult_42 = true;
-        }
-      }
-
-      if (andResult_42) {
-        orResult_3 = true;
-      } else {
-        Boolean orResult_4 = false;
-
-        Boolean andResult_44 = false;
-
-        if (Utils.equals(deltaX, 1L)) {
-          Boolean andResult_45 = false;
-
-          if (Utils.equals(deltaY, 0L)) {
-            if (Utils.equals(deltaZ, 0L)) {
-              andResult_45 = true;
-            }
-          }
-
-          if (andResult_45) {
-            andResult_44 = true;
-          }
-        }
-
-        if (andResult_44) {
-          orResult_4 = true;
-        } else {
-          Boolean orResult_5 = false;
-
-          Boolean andResult_46 = false;
-
-          if (Utils.equals(deltaX, -1L)) {
-            Boolean andResult_47 = false;
-
-            if (Utils.equals(deltaY, 0L)) {
-              if (Utils.equals(deltaZ, 0L)) {
-                andResult_47 = true;
-              }
-            }
-
-            if (andResult_47) {
-              andResult_46 = true;
-            }
-          }
-
-          if (andResult_46) {
-            orResult_5 = true;
-          } else {
-            Boolean orResult_6 = false;
-
-            Boolean andResult_48 = false;
-
-            if (Utils.equals(deltaX, 0L)) {
-              Boolean andResult_49 = false;
-
-              if (Utils.equals(deltaY, 1L)) {
-                if (Utils.equals(deltaZ, 0L)) {
-                  andResult_49 = true;
-                }
-              }
-
-              if (andResult_49) {
-                andResult_48 = true;
-              }
-            }
-
-            if (andResult_48) {
-              orResult_6 = true;
-            } else {
-              Boolean andResult_50 = false;
-
-              if (Utils.equals(deltaX, 0L)) {
-                Boolean andResult_51 = false;
-
-                if (Utils.equals(deltaY, -1L)) {
-                  if (Utils.equals(deltaZ, 0L)) {
-                    andResult_51 = true;
-                  }
-                }
-
-                if (andResult_51) {
-                  andResult_50 = true;
-                }
-              }
-
-              orResult_6 = andResult_50;
-            }
-
-            orResult_5 = orResult_6;
-          }
-
-          orResult_4 = orResult_5;
-        }
-
-        orResult_3 = orResult_4;
-      }
-
-      orResult_2 = orResult_3;
-    }
-
-    return orResult_2;
-  }
-
   public static Boolean IsShortestPath(
       final VDMMap dist_1,
       final VDMMap pred_1,
@@ -774,16 +672,16 @@ public class Building {
       final VDMSet graph_1,
       final VDMSet points_1) {
 
-    Boolean andResult_52 = false;
+    Boolean andResult_46 = false;
 
     if (DefinesShortestDist(
         Utils.copy(dist_1), Utils.copy(pred_1), Utils.copy(C_1), s_1, Utils.copy(graph_1))) {
       if (SetOfLinkedVertices(Utils.copy(C_1), s_1, Utils.copy(graph_1), Utils.copy(points_1))) {
-        andResult_52 = true;
+        andResult_46 = true;
       }
     }
 
-    return andResult_52;
+    return andResult_46;
   }
 
   public static Boolean DefinesShortestDist(
@@ -793,14 +691,14 @@ public class Building {
       final PointOfInterest s,
       final VDMSet graph) {
 
-    Boolean andResult_53 = false;
+    Boolean andResult_47 = false;
 
     if (Utils.equals(((Number) Utils.get(dist, s)), 0L)) {
       Boolean forAllExpResult_2 = true;
       VDMSet set_9 = SetUtil.diff(Utils.copy(C), SetUtil.set(s));
       for (Iterator iterator_9 = set_9.iterator(); iterator_9.hasNext() && forAllExpResult_2; ) {
         PointOfInterest u = ((PointOfInterest) iterator_9.next());
-        Boolean andResult_54 = false;
+        Boolean andResult_48 = false;
 
         Boolean existsExpResult_2 = false;
         VDMSet set_10 = Utils.copy(C);
@@ -808,10 +706,10 @@ public class Building {
             iterator_10.hasNext() && !(existsExpResult_2);
             ) {
           PointOfInterest v = ((PointOfInterest) iterator_10.next());
-          Boolean andResult_55 = false;
+          Boolean andResult_49 = false;
 
           if (Utils.equals(((PointOfInterest) Utils.get(pred, u)), v)) {
-            Boolean andResult_56 = false;
+            Boolean andResult_50 = false;
 
             if (neighbour(Utils.copy(graph), u, v)) {
               Boolean letBeStExp_1 = null;
@@ -833,16 +731,16 @@ public class Building {
                       ((Number) Utils.get(dist, u)),
                       ((Number) Utils.get(dist, v)).longValue() + tup.w.longValue());
               if (letBeStExp_1) {
-                andResult_56 = true;
+                andResult_50 = true;
               }
             }
 
-            if (andResult_56) {
-              andResult_55 = true;
+            if (andResult_50) {
+              andResult_49 = true;
             }
           }
 
-          existsExpResult_2 = andResult_55;
+          existsExpResult_2 = andResult_49;
         }
         if (existsExpResult_2) {
           Boolean forAllExpResult_3 = true;
@@ -855,10 +753,10 @@ public class Building {
                 iterator_13.hasNext() && forAllExpResult_3;
                 ) {
               PointOfInterest v = ((PointOfInterest) iterator_13.next());
-              Boolean orResult_7 = false;
+              Boolean orResult_2 = false;
 
               if (!(neighbour(Utils.copy(graph), u1, v))) {
-                orResult_7 = true;
+                orResult_2 = true;
               } else {
                 Boolean letBeStExp_2 = null;
                 Graph tup = null;
@@ -877,25 +775,25 @@ public class Building {
                 letBeStExp_2 =
                     ((Number) Utils.get(dist, u1)).longValue()
                         <= ((Number) Utils.get(dist, v)).longValue() + tup.w.longValue();
-                orResult_7 = letBeStExp_2;
+                orResult_2 = letBeStExp_2;
               }
 
-              forAllExpResult_3 = orResult_7;
+              forAllExpResult_3 = orResult_2;
             }
           }
           if (forAllExpResult_3) {
-            andResult_54 = true;
+            andResult_48 = true;
           }
         }
 
-        forAllExpResult_2 = andResult_54;
+        forAllExpResult_2 = andResult_48;
       }
       if (forAllExpResult_2) {
-        andResult_53 = true;
+        andResult_47 = true;
       }
     }
 
-    return andResult_53;
+    return andResult_47;
   }
 
   public static Boolean SetOfLinkedVertices(
@@ -905,21 +803,21 @@ public class Building {
     VDMSet set_14 = Utils.copy(C);
     for (Iterator iterator_15 = set_14.iterator(); iterator_15.hasNext() && forAllExpResult_4; ) {
       PointOfInterest u = ((PointOfInterest) iterator_15.next());
-      Boolean andResult_57 = false;
+      Boolean andResult_51 = false;
 
       Boolean forAllExpResult_5 = true;
       VDMSet set_15 = Utils.copy(points);
       for (Iterator iterator_16 = set_15.iterator(); iterator_16.hasNext() && forAllExpResult_5; ) {
         PointOfInterest v = ((PointOfInterest) iterator_16.next());
-        Boolean orResult_8 = false;
+        Boolean orResult_3 = false;
 
         if (!(neighbour(Utils.copy(graph), u, v))) {
-          orResult_8 = true;
+          orResult_3 = true;
         } else {
-          orResult_8 = SetUtil.inSet(v, C);
+          orResult_3 = SetUtil.inSet(v, C);
         }
 
-        forAllExpResult_5 = orResult_8;
+        forAllExpResult_5 = orResult_3;
       }
       if (forAllExpResult_5) {
         Boolean forAllExpResult_6 = true;
@@ -939,11 +837,11 @@ public class Building {
           forAllExpResult_6 = existsExpResult_3;
         }
         if (forAllExpResult_6) {
-          andResult_57 = true;
+          andResult_51 = true;
         }
       }
 
-      forAllExpResult_4 = andResult_57;
+      forAllExpResult_4 = andResult_51;
     }
     return forAllExpResult_4;
   }
@@ -957,23 +855,23 @@ public class Building {
         iterator_19.hasNext() && !(existsExpResult_4);
         ) {
       Graph tup = ((Graph) iterator_19.next());
-      Boolean andResult_58 = false;
+      Boolean andResult_52 = false;
 
       if (Utils.equals(tup.e, SetUtil.set(i, j))) {
-        Boolean andResult_59 = false;
+        Boolean andResult_53 = false;
 
         if (tup.w.longValue() > 0L) {
-          if (!(Utils.equals(j.description,  WallQuote.getInstance()))) {
-            andResult_59 = true;
+          if (!(Utils.equals(j.description, WallQuote.getInstance()))) {
+            andResult_53 = true;
           }
         }
 
-        if (andResult_59) {
-          andResult_58 = true;
+        if (andResult_53) {
+          andResult_52 = true;
         }
       }
 
-      existsExpResult_4 = andResult_58;
+      existsExpResult_4 = andResult_52;
     }
     return existsExpResult_4;
   }
@@ -986,7 +884,7 @@ public class Building {
         iterator_20.hasNext() && !(existsExpResult_5);
         ) {
       PointOfInterest p = ((PointOfInterest) iterator_20.next());
-      existsExpResult_5 = Utils.equals(p.description,  OriginQuote.getInstance());
+      existsExpResult_5 = Utils.equals(p.description, OriginQuote.getInstance());
     }
     return existsExpResult_5;
   }
@@ -1000,7 +898,7 @@ public class Building {
         ) {
       PointOfInterest p = ((PointOfInterest) iterator_21.next());
       existsExpResult_6 =
-          Utils.equals(p.description,  DestinationQuote.getInstance());
+          Utils.equals(p.description, DestinationQuote.getInstance());
     }
     return existsExpResult_6;
   }
@@ -1013,47 +911,47 @@ public class Building {
       final Number max_columns_1,
       final Number max_floors_1) {
 
-    Boolean andResult_60 = false;
+    Boolean andResult_54 = false;
 
     if (x.longValue() >= 0L) {
-      Boolean andResult_61 = false;
+      Boolean andResult_55 = false;
 
       if (x.longValue() <= max_lines_1.longValue()) {
-        Boolean andResult_62 = false;
+        Boolean andResult_56 = false;
 
         if (y.longValue() >= 0L) {
-          Boolean andResult_63 = false;
+          Boolean andResult_57 = false;
 
           if (y.longValue() <= max_columns_1.longValue()) {
-            Boolean andResult_64 = false;
+            Boolean andResult_58 = false;
 
             if (z.longValue() >= 0L) {
               if (z.longValue() <= max_floors_1.longValue()) {
-                andResult_64 = true;
+                andResult_58 = true;
               }
             }
 
-            if (andResult_64) {
-              andResult_63 = true;
+            if (andResult_58) {
+              andResult_57 = true;
             }
           }
 
-          if (andResult_63) {
-            andResult_62 = true;
+          if (andResult_57) {
+            andResult_56 = true;
           }
         }
 
-        if (andResult_62) {
-          andResult_61 = true;
+        if (andResult_56) {
+          andResult_55 = true;
         }
       }
 
-      if (andResult_61) {
-        andResult_60 = true;
+      if (andResult_55) {
+        andResult_54 = true;
       }
     }
 
-    return andResult_60;
+    return andResult_54;
   }
 
   public String toString() {
@@ -1132,6 +1030,7 @@ public class Building {
       return "mk_Building`Graph" + Utils.formatFields(e, w);
     }
   }
+  
   public static void main(String[] args) {
 	  //teste 1 
 	  System.out.println("Teste 1:\n");
