@@ -99,11 +99,11 @@ operations
 	  public static main: () ==> ()
 	  		main() ==
 	  		(
-	  			--new TestBuilding().TestCreateBuilding();
-	  			--new TestBuilding().TestAddOrigin();
-	  			--new TestBuilding().TestAddDestination();
-	  			--new TestBuilding().TestAddType();
-	  			--new TestBuilding().TestMakePath();
+	  			new TestBuilding().TestCreateBuilding();
+	  			new TestBuilding().TestAddOrigin();
+	  			new TestBuilding().TestAddDestination();
+	  			new TestBuilding().TestAddType();
+	  			new TestBuilding().TestMakePath();
 	  			new TestBuilding().TestFindCoffeeNearby();
 	  		);
 functions
