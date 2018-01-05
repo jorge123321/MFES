@@ -29,16 +29,6 @@ instance variables
 	public max_floors : int;
 
 functions
-	-- CHECK if we're only moving 1 position at a time, ie one move on the x left or right, one move on y up or down and one move on z up or down
-	public moveIsValid : nat * nat * nat -> bool
-			moveIsValid(deltaX, deltaY, deltaZ) == (
-				(deltaX = 0 and deltaY = 0 and deltaZ = 1) or
-				(deltaX = 0 and deltaY = 0 and deltaZ = -1) or
-				(deltaX = 1 and deltaY = 0 and deltaZ = 0) or
-				(deltaX = -1 and deltaY = 0 and deltaZ = 0) or
-				(deltaX = 0 and deltaY = 1 and deltaZ = 0) or
-				(deltaX = 0 and deltaY = -1 and deltaZ = 0)
-			);
 				
 	-- CHECK If result is the Shortest Path	
 	public IsShortestPath: map PointOfInterest to nat * map PointOfInterest to PointOfInterest * set of PointOfInterest * PointOfInterest * set of Graph * Points -> bool
@@ -112,54 +102,6 @@ operations
 		return self;
 		);
 		
-		--public indoorFinder: () ==> seq of PointOfInterest
-		--	indoorFinder() == (
-		--		if(sameZ(origin, destination)) then 
-		--		(
-		--			dijkstra(origin);
-		--			return makePath();
-		--		)else
-		--		(
-		--			dcl pathToStair: seq of PointOfInterest := [];
-		--			dcl tempDest : PointOfInterest;
-		--			pathToStair := getPathToClosestType(<Stair>);
-		--			if(pathToStair <> {}) then(
-		--			for all p in set pathToStair do(
-		--				if(p.GetDesc() = <Destination>) then 
-		--				(
-		--					tempDest := p;
-		--				)
-		--			);					
-		--		return indoorFinderZ(pathToStair, tempDest);
-		--		) -- else printf('impossible')??
-		--		);				
-		--	);
-			
-		--public indoorFinderZ: seq of PointOfInterest ==> seq of PointOfInterest
-		--	indoorFinderZ(pointSeq, tempOrigin) == (
-		--		if(sameZ(tempOrigin, destination)) then 
-		--		(
-		--			dijkstra(tempOrigin);
-		--			pointSeq := pointSeq union makePath();
-		--			return pointSeq;
-		--		)else
-		--		(
-		--			dcl pathToStair: seq of PointOfInterest := [];
-		--			dcl tempDest : PointOfInterest;
-		--			pathToStair := getPathToClosestType(<Stair>);
-		--			if(pathToStair <> {}) then(
-		--			for all p in set pathToStair do(
-		--				if(p.GetDesc() = <Destination>) then 
-		--				(
-		--					tempDest := p;
-		--				)
-		--			);					
-		--		return indoorFinderZ(pathToStair, tempDest);
-		--		) -- else printf('impossible')??
-		--		);				
-		--	);
-			
-		
 	--CHECK if a point has the same coords as another point
 	public sameCoords: PointOfInterest * PointOfInterest ==> bool
 		sameCoords(p1, p2) == (
@@ -199,9 +141,6 @@ operations
 			);
 		) pre dist <> {|->} and pred <> {|->} and hasOrigin(points) and hasDestination(points);
 
-	--Dijkstra Algorithm
-	--public dijkstra: PointOfInterest ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
-		--dijkstra(s) == (
 		
 		public startDijkstra: () ==> Building`Points * map PointOfInterest to int * map PointOfInterest to PointOfInterest
 			startDijkstra() == (					
@@ -329,16 +268,24 @@ operations
 	-- CHANGE Origin point to the building
 	public changeOrigin: nat * nat * nat ==> bool
 		changeOrigin(x,y,z) == (
+		dcl result : bool := false;
 			for all p in set points do (
 				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
 				then (
-					resetOrigin();
 					p.changePoint(x,y, z, <Origin>);
 					origin := p;
-					return true;
+					result := true;
 				)
 			);
-			return false;
+			if(result) then (
+			for all p in set points do (
+				if (p.GetDesc() = <Origin> and p.GetX() <> x and p.GetY() <> y and p.GetZ() <> z)
+				then (
+					p.changePoint(x,y, z, <Null>);
+				)
+			);
+			);
+			return result;
 		)
 		pre  hasOrigin(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
 		post hasOrigin(points);
@@ -346,58 +293,28 @@ operations
 	-- CHANGE Destination point to the building
 	public changeDestination: nat * nat * nat ==> bool
 		changeDestination(x,y,z) == (
+		dcl result : bool := false;
 			for all p in set points do (
 				if (p.GetX() = x and p.GetY() = y and p.GetZ() = z)
 				then (
-					resetDestination();
-					p.changePoint(x,y, z, <Origin>);
-					origin := p;
-					return true;
+					p.changePoint(x,y, z, <Destination>);
+					destination := p;
+					result := true;
 				)
 			);
-			return false;
+			if(result) then (
+			for all p in set points do (
+				if (p.GetDesc() = <Destination> and p.GetX() <> x and p.GetY() <> y and p.GetZ() <> z)
+				then (
+					p.changePoint(x,y, z, <Null>);
+				)
+			);
+			);
+			return result;
 		)
 		pre  hasDestination(points) and validPosition(x,y,z,max_lines,max_columns,max_floors)
 		post hasDestination(points);
 				
-	-- CHANGE X Y Z and Description of point of interest 
-	public changePoint: PointOfInterest*nat*nat*nat*PointOfInterest`Type ==> ()
-		changePoint(p,newx, newy, newz, newdesc) == (
-			p.changePoint(newx, newy, newz, newdesc);
-			return;
-		)
-		pre p in set points;
-		
-		--RESET Origin
-		public resetOrigin: () ==> bool
-			resetOrigin() == (
-				for all p in set points do(
-					if (p.GetDesc() = <Origin>)
-					then (
-						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
-						return true;
-					)
-				);
-				return false;
-			)
-			pre hasOrigin(points)
-			post not hasOrigin(points);
-			
-		--RESET Destination
-		public resetDestination: () ==> bool
-			resetDestination() == (
-				for all p in set points do(
-					if (p.GetDesc() = <Destination>)
-					then (
-						addType(p.GetX(),p.GetY(),p.GetZ(),<Null>);
-						return true;
-					)
-				);
-				return false;
-			)
-			pre hasDestination(points)
-			post not hasDestination(points);
-
 	
 	-- GET all positions next to a Point
 	public getNeighbours : PointOfInterest ==> set of PointOfInterest
@@ -443,6 +360,6 @@ operations
 				);
 				return [];
 			)
-			pre dist <> {|->} and hasDestination(points) and exists p in set points & (p.description = type);
+			pre dist <> {|->} and hasOrigin(points) and exists p in set points & (p.description = type);
 				
 end Building
